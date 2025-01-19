@@ -5,7 +5,8 @@ import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, up
 import { VerifyJWT } from '../middlewares/auth.middleware.js';
 
 import {
-  createExpense,
+  calculateGroupBalances,
+  createExpense, getExpensesByGroup, updateExpense
 } from '../controllers/expence.controller.js';
  const router = Router();
  
@@ -41,6 +42,18 @@ router.route("/create-group").post(VerifyJWT,createGroup);
  router.route('/create-expence').post(
  // VerifyJWT,
    createExpense); 
+
+   router.route('/getExpensesByGroup/:groupId').get(
+    // VerifyJWT,
+    getExpensesByGroup); 
+
+    router.route('/update-expence/:expenseId').put(
+      // VerifyJWT,
+      updateExpense);
+
+      router.route('/groupbalance/:groupId/balances').get(
+        // VerifyJWT,
+        calculateGroupBalances);
 
 export default router
 

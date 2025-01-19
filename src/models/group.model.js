@@ -13,10 +13,12 @@ const groupSchema = new Schema(
        ref: 'User', 
        required: true
        },
-    members: [{
+    members: [
+      {
        type: Schema.Types.ObjectId, 
        ref: 'User' 
-      }],
+      }
+    ],
     expenses: [{ 
       type: Schema.Types.ObjectId,
        ref: 'Expense'
@@ -29,6 +31,11 @@ const groupSchema = new Schema(
   },
   { timestamps: true }
 );
+
+
+groupSchema.path('members').validate(function (members) {
+  return members.length > 1;
+}, 'A group must have more than one member.');
 
 const Group = model('Group', groupSchema);
 

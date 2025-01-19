@@ -1,12 +1,13 @@
  import { Router } from 'express';
  
-import { createGroup, getGroupDetails } from '../controllers/group.controller.js';
+import { createGroup, getGroupDetails ,updateGroupDetails} from '../controllers/group.controller.js';
 import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
 import { VerifyJWT } from '../middlewares/auth.middleware.js';
 
 import {
-  createExpense,
+  createExpense
 } from '../controllers/expence.controller.js';
+
  const router = Router();
  
 
@@ -33,8 +34,9 @@ router.route("/change-password").post(VerifyJWT,changePassword);
 
 //Group routes
 router.route("/create-group").post(VerifyJWT,createGroup);
- router.route("/get-group/:groupId").get(VerifyJWT,getGroupDetails);
- 
+router.route("/get-group/:groupId").get(VerifyJWT,getGroupDetails);
+router.route("/update-group/:groupId").patch(VerifyJWT,updateGroupDetails);
+
 
  // Expence routers
 

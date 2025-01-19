@@ -73,7 +73,10 @@ const createGroup = asyncHandler(async (req, res) => {
       .json(new ApiResponse(201, group, "Group created successfully"));
   });
   
-  const getGroupDetails = asyncHandler(async (req, res) => {
+
+
+  
+const getGroupDetails = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
     if (!req.user || !req.user._id) {
         return res.status(401).json(new ApiError(401, "Unauthorized user"));

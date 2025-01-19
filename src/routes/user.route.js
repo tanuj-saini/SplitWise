@@ -1,6 +1,6 @@
  import { Router } from 'express';
  
-import { createGroup, getGroupDetails } from '../controllers/group.controller.js';
+import { createGroup, getGroupDetails, updateGroupDetails } from '../controllers/group.controller.js';
 import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
 import { VerifyJWT } from '../middlewares/auth.middleware.js';
 

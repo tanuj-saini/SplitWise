@@ -34,8 +34,9 @@ router.route("/change-password").post(VerifyJWT,changePassword);
 
 //Group routes
 router.route("/create-group").post(VerifyJWT,createGroup);
- router.route("/get-group/:groupId").get(VerifyJWT,getGroupDetails);
- 
+router.route("/get-group/:groupId").get(VerifyJWT,getGroupDetails);
+router.route("/update-group/:groupId").patch(VerifyJWT,updateGroupDetails);
+
 
  // Expence routers
 

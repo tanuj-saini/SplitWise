@@ -75,7 +75,7 @@ const createGroup = asyncHandler(async (req, res) => {
   
 
 
-  
+
 const getGroupDetails = asyncHandler(async (req, res) => {
     const { groupId } = req.params;
     if (!req.user || !req.user._id) {
@@ -122,8 +122,81 @@ const getGroupDetails = asyncHandler(async (req, res) => {
   });
   
 
+  const updateGroupDetails = asyncHandler(async (req, res) => {
+    const { groupId } = req.params;
+    const { name, members } = req.body;
   
-  export { createGroup ,getGroupDetails };
+    // Ensure the user is authenticated
+    if (!req.user || !req.user._id) {
+      return res.status(401).json(new ApiError(401, "Unauthorized user"));
+    }
+  
+    // Validate group ID
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json(new ApiError(400, "Invalid group ID"));
+    }
+  
+    // Fetch the group details
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json(new ApiError(404, "Group not found"));
+    }
+  
+    // Check if the user is a member of the group
+    const isMember = group.members.some(
+      (member) => member.toString() === req.user._id.toString()
+    );
+    if (!isMember) {
+      return res.status(403).json(new ApiError(403, "Access denied to this group"));
+    }
+  
+    // Validate and process new members
+    let newMembers = [];
+    if (members) {
+      // Ensure all new members are registered users
+      const existingUsers = await User.find({ _id: { $in: members } }).select("_id");
+      const existingUserIds = existingUsers.map((user) => user._id.toString());
+  
+      const invalidMembers = members.filter(
+        (member) => !existingUserIds.includes(member.toString())
+      );
+      if (invalidMembers.length > 0) {
+        return res.status(400).json(
+          new ApiError(
+            400,
+            `Some members are not registered: ${invalidMembers.join(", ")}`
+          )
+        );
+      }
+  
+      // Identify new members to add
+      newMembers = members.filter(
+        (member) => !group.members.includes(member.toString())
+      );
+    }
+  
+    // Update the group details
+    if (name) group.name = name;
+    if (members) group.members = [...new Set([...group.members, ...newMembers])];
+  
+    // Save the updated group
+    await group.save();
+  
+    // Update the joinedGroups field for newly added members
+    if (newMembers.length > 0) {
+      await User.updateMany(
+        { _id: { $in: newMembers } },
+        { $addToSet: { joinedGroups: group._id } }
+      );
+    }
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, group, "Group details updated successfully"));
+  });
+
+  
+  export { createGroup ,getGroupDetails,updateGroupDetails };
   
 
 

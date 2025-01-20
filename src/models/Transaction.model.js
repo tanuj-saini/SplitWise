@@ -27,6 +27,16 @@ const transactionSchema = new Schema(
        type: String,
      
        },
+    balanceId :{
+      type : Schema.Types.ObjectId,
+      ref : "Balance",
+      requied : true
+    },
+    expenseId:{
+      type : Schema.Types.ObjectId,
+      ref : "Expense",
+      required : true
+    },
     status: { 
       type: String, 
       enum: ['pending', 'completed', 'failed'],

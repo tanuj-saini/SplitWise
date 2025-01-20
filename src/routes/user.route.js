@@ -4,6 +4,7 @@ import { calculateGroupBalances, createExpense, getExpenseById, getExpensesByGro
 import { createGroup, getGroupDetails, updateGroupDetails } from '../controllers/group.controller.js';
 import { createTransaction, getTransactionById, getTransactionsByGroup, updateTransaction } from '../controllers/transition.controller.js';
 import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
+import { updateBalanceSheet } from '../controllers/balance.controller.js'
 import { VerifyJWT } from '../middlewares/auth.middleware.js';
 
 
@@ -44,7 +45,8 @@ router.route('/get-transactions-groupId/:groupId').get(VerifyJWT,getTransactions
 router.route('/get-transactions-id/:transactionId').get(VerifyJWT,getTransactionById);
 
  
-
+//Balance Routes
+ router.route('/update-balance').post(updateBalanceSheet);
 
 
 // Expence routers

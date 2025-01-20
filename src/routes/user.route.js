@@ -1,6 +1,6 @@
  import { Router } from 'express';
  
-import { calculateGroupBalances, createExpense, getExpensesByGroup, updateExpense } from '../controllers/expence.controller.js';
+import { calculateGroupBalances, createExpense, getExpenseById, getExpensesByGroup, updateExpense } from '../controllers/expence.controller.js';
 import { createGroup, getGroupDetails, updateGroupDetails } from '../controllers/group.controller.js';
 import { createTransaction, getTransactionById, getTransactionsByGroup, updateTransaction } from '../controllers/transition.controller.js';
 import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
@@ -63,5 +63,10 @@ router.route('/get-transactions-id/:transactionId').get(VerifyJWT,getTransaction
       router.route('/groupbalance/:groupId/balances').get(
         // VerifyJWT,
         calculateGroupBalances);
+
+        router.route('/getExpenseById/:expenseId').get(
+          //VerifyJWT,
+          getExpenseById);
+
 
 export default router

@@ -1,13 +1,13 @@
 
 
+import Balance from "../models/balance.model.js";
 import Expense from "../models/Expense.model.js";
 import Group from "../models/group.model.js";
-import Balance from "../models/balance.model.js";
-import mongoose from "mongoose";
 
-import asyncHandler from "../utils/asyncHandler.js";
-import {ApiError} from "../utils/ApiError.js";
+import mongoose from "mongoose";
+import { ApiError } from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 // Helper functions (no change required)
 
@@ -95,11 +95,18 @@ const simplifyBalances = (balanceSheet) => {
 
 const createExpense = asyncHandler(async (req, res) => {
   const { groupId, description, amount, paidBy, splitAmong, splitType, manualSplit } = req.body;
-
+  if (!mongoose.isValidObjectId(groupId)) {
+    return res.status(400).json(new ApiError(400, "Invalid Group ID format"));
+  }
   // Step 1: Validate Group
   const group = await Group.findById(groupId);
-  if (!group) 
+  if (!group || group==null) 
   return res.status(404).json(new ApiError(404, "Group not found"));
+
+
+ 
+
+
 
   // Step 2: Validate Users in Group
   const invalidUsers = validateGroupMembers(group.members, [...paidBy, ...splitAmong]);
@@ -173,7 +180,9 @@ const createExpense = asyncHandler(async (req, res) => {
 const updateExpense = asyncHandler(async (req, res) => {
   const { expenseId } = req.params;
   const { description, amount, paidBy, splitAmong, splitType, manualSplit } = req.body;
-
+  if (!mongoose.isValidObjectId(expenseId)) {
+    return res.status(400).json(new ApiError(400, "Expense not found"));
+  }
   const expense = await Expense.findById(expenseId);
   if (!expense) 
   return res.status(404).json(new ApiError(404, "Expense not found"));
@@ -188,7 +197,9 @@ const updateExpense = asyncHandler(async (req, res) => {
     shouldUpdateBalances = true;
     expense.amount = amount;
   }
-
+  // if (!mongoose.isValidObjectId(paidBy)) {
+  //   return res.status(400).json(new ApiError(400, "No such user"));
+  // }
   // Update paidBy and splitAmong if provided
   if (paidBy) expense.paidBy = paidBy;
   if (splitAmong) expense.splitAmong = splitAmong;
@@ -251,7 +262,9 @@ const getExpensesByGroup = asyncHandler(async (req, res) => {
   const { minAmount, maxAmount, startDate, endDate, paidBy, splitAmong, description } = req.query;
 
   const query = { groupId };
-
+ if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json(new ApiError(400, "Invalid group ID"));
+    }
   if (minAmount || maxAmount) {
     query.amount = {};
     if (minAmount) query.amount.$gte = Number(minAmount);
@@ -360,4 +373,28 @@ const calculateGroupBalances = asyncHandler(async (req, res) => {
  return res.status(200).json(new ApiResponse( 200,simplifiedBalanceSheet, "Calculate Group Expense"));
 });
 
-export {calculateGroupBalances, createExpense, updateExpense, getExpensesByGroup, deleteExpense };
+
+
+// get expence by expence id
+const getExpenseById = asyncHandler(async (req, res) => {
+  const { expenseId } = req.params;
+
+  // Validate expenseId
+  if (!mongoose.isValidObjectId(expenseId)) {
+    return res.status(400).json(new ApiError(400, "Invalid Expense ID format"));
+  }
+
+  // Find the expense
+  const expense = await Expense.findById(expenseId).populate("paidBy splitAmong");
+
+  if (!expense) {
+    return res.status(404).json(new ApiError(404, "Expense not found"));
+  }
+
+  return res.status(200).json(new ApiResponse(200, expense, "Expense retrieved successfully"));
+});
+
+
+
+export { calculateGroupBalances, createExpense, deleteExpense, getExpenseById, getExpensesByGroup, updateExpense };
+

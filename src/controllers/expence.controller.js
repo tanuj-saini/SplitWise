@@ -1,166 +1,81 @@
-import Expense from '../models/Expense.model.js';
+
+
+import Expense from "../models/Expense.model.js";
 import Group from "../models/group.model.js";
 
-
-// Create a new expense
-export const createExpense = async (req, res) => {
-  const { groupId, description, amount, paidBy, splitAmong, splitType } = req.body;
-
-  try {
-
-    // if (!req.user || !req.user._id) {
-    //     return res.status(401).json(new ApiError(401, "Unauthorized user"));
-    //   }
-    // Validate group existence
-    const group = await Group.findById(groupId);
-    if (!group) return res.status(404).json({ message: 'Group not found' });
-
-    // Ensure all users exist in the group
-    const invalidUsers = [...paidBy, ...splitAmong].filter(
-      (userId) => !group.members.includes(userId)
-    );
-    if (invalidUsers.length > 0) {
-      return res.status(400).json({ message: 'Some users are not members of the group' });
-    }
-
-    // Create the expense
-    const expense = new Expense({
-      groupId,
-      description,
-      amount,
-      paidBy,
-      splitAmong,
-      splitType,
-    });
-    await expense.save();
-
-    // Add expense to the group's expenses array
-    group.expenses.push(expense._id);
-    await group.save();
-
-    res.status(201).json({ message: 'Expense created successfully', expense });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
-  }
+// Helper: Validate Group Members
+const validateGroupMembers = (groupMembers, userIds) => {
+  return userIds.filter((userId) => !groupMembers.includes(userId));
 };
 
+// Helper: Calculate Balance and Detailed Split
+const calculateSplits = (amount, paidBy, splitAmong, splitType, manualSplit) => {
+  let balanceSheet = {};
+  let detailedSplit = [];
 
-export const getExpensesByGroup = async (req, res) => {
-  const { groupId } = req.params;
-
-  try {
-    const expenses = await Expense.find({ groupId }).populate('paidBy splitAmong');
-    res.status(200).json(expenses);
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
-  }
-};
- // update Expence
-
- 
-
-export const updateExpense = async (req, res) => {
-  const { expenseId } = req.params;
-  const { description, amount, paidBy, splitAmong, splitType } = req.body;
-
-  try {
-    const expense = await Expense.findById(expenseId);
-    if (!expense) return res.status(404).json({ message: 'Expense not found' });
-
-    // Update fields
-    if (description) expense.description = description;
-    if (amount) expense.amount = amount;
-    if (paidBy) expense.paidBy = paidBy;
-    if (splitAmong) expense.splitAmong = splitAmong;
-    if (splitType) expense.splitType = splitType;
-
-    await expense.save();
-    res.status(200).json({ message: 'Expense updated successfully', expense });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
-  }
-};
-
-export const calculateGroupBalances = async (req, res) => {
-  const { groupId } = req.params;
-
-  try {
-    const expenses = await Expense.find({ groupId });
-    const balanceSheet = {};
-
-    expenses.forEach((expense) => {
-      const { amount, paidBy, splitAmong, splitType } = expense;
-      const splitAmount = splitType === 'equal' ? amount / splitAmong.length : null;
-
+  if (splitType === "amount" && manualSplit) {
+    Object.entries(manualSplit).forEach(([user, splitAmount]) => {
       paidBy.forEach((payer) => {
-        splitAmong.forEach((user) => {
-          if (payer !== user) {
-            if (!balanceSheet[payer]) balanceSheet[payer] = {};
-            if (!balanceSheet[payer][user]) balanceSheet[payer][user] = 0;
+        if (payer.toString() !== user) {
+          if (!balanceSheet[payer]) balanceSheet[payer] = {};
+          if (!balanceSheet[payer][user]) balanceSheet[payer][user] = 0;
 
-            balanceSheet[payer][user] += splitAmount;
-          }
-        });
+          balanceSheet[payer][user] += splitAmount;
+
+          detailedSplit.push({
+            from: user,
+            to: payer,
+            amount: splitAmount,
+          });
+        }
       });
     });
+  } else if (splitType === "equal") {
+    const splitAmount = amount / splitAmong.length;
 
-    res.status(200).json(balanceSheet);
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
+    splitAmong.forEach((user) => {
+      paidBy.forEach((payer) => {
+        if (payer.toString() !== user) {
+          if (!balanceSheet[payer]) balanceSheet[payer] = {};
+          if (!balanceSheet[payer][user]) balanceSheet[payer][user] = 0;
+
+          balanceSheet[payer][user] += splitAmount;
+
+          detailedSplit.push({
+            from: user,
+            to: payer,
+            amount: splitAmount,
+          });
+        }
+      });
+    });
   }
+
+  return { balanceSheet, detailedSplit };
 };
 
-
-
-
-/*
-  import express from 'express';
-import {
-  createExpense,
-  getExpensesByGroup,
-  updateExpense,
-  deleteExpense,
-  calculateGroupBalances,
-  getExpenseById,
-  splitExpenseManually,
-} from '../controllers/expenseController.js';
-
-const router = express.Router();
-
-router.post('/', createExpense);
-router.get('/group/:groupId', getExpensesByGroup);
-router.get('/:expenseId', getExpenseById);
-router.put('/:expenseId', updateExpense);
-router.delete('/:expenseId', deleteExpense);
-router.get('/group/:groupId/balances', calculateGroupBalances);
-router.post('/:expenseId/split', splitExpenseManually);
-
-export default router;
-  */
-
-
-/*  import Expense from '../models/Expense.js';
-import Group from '../models/Group.js';
-import User from '../models/User.js';
-
-// Create a new expense
+// Create a New Expense
 export const createExpense = async (req, res) => {
-  const { groupId, description, amount, paidBy, splitAmong, splitType } = req.body;
+  const { groupId, description, amount, paidBy, splitAmong, splitType, manualSplit } = req.body;
 
   try {
-    // Validate group existence
     const group = await Group.findById(groupId);
-    if (!group) return res.status(404).json({ message: 'Group not found' });
+    if (!group) return res.status(404).json({ message: "Group not found" });
 
-    // Ensure all users exist in the group
-    const invalidUsers = [...paidBy, ...splitAmong].filter(
-      (userId) => !group.members.includes(userId)
-    );
+    const invalidUsers = validateGroupMembers(group.members, [...paidBy, ...splitAmong]);
     if (invalidUsers.length > 0) {
-      return res.status(400).json({ message: 'Some users are not members of the group' });
+      return res.status(400).json({ message: "Some users are not members of the group" });
     }
 
-    // Create the expense
+    if (splitType === "amount" && manualSplit) {
+      const totalManualSplit = Object.values(manualSplit).reduce((sum, value) => sum + value, 0);
+      if (totalManualSplit !== amount) {
+        return res.status(400).json({ message: "Manual split amounts do not match the total expense amount" });
+      }
+    }
+
+    const { balanceSheet, detailedSplit } = calculateSplits(amount, paidBy, splitAmong, splitType, manualSplit);
+
     const expense = new Expense({
       groupId,
       description,
@@ -168,146 +83,148 @@ export const createExpense = async (req, res) => {
       paidBy,
       splitAmong,
       splitType,
+      balanceSheet,
+      detailedSplit,
     });
-    await expense.save();
 
-    // Add expense to the group's expenses array
+    await expense.save();
     group.expenses.push(expense._id);
     await group.save();
 
-    res.status(201).json({ message: 'Expense created successfully', expense });
+    res.status(201).json({ message: "Expense created successfully", expense });
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
 
-// Get all expenses for a group
+// Get All Expenses for a Group
 export const getExpensesByGroup = async (req, res) => {
   const { groupId } = req.params;
 
   try {
-    const expenses = await Expense.find({ groupId }).populate('paidBy splitAmong');
+    const expenses = await Expense.find({ groupId }).populate("paidBy splitAmong");
     res.status(200).json(expenses);
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
 
-// Update an expense
+// Update an Expense
 export const updateExpense = async (req, res) => {
   const { expenseId } = req.params;
-  const { description, amount, paidBy, splitAmong, splitType } = req.body;
+  const { description, amount, paidBy, splitAmong, splitType, manualSplit } = req.body;
 
   try {
     const expense = await Expense.findById(expenseId);
-    if (!expense) return res.status(404).json({ message: 'Expense not found' });
+    if (!expense) return res.status(404).json({ message: "Expense not found" });
 
-    // Update fields
     if (description) expense.description = description;
     if (amount) expense.amount = amount;
     if (paidBy) expense.paidBy = paidBy;
     if (splitAmong) expense.splitAmong = splitAmong;
     if (splitType) expense.splitType = splitType;
 
+    const { balanceSheet, detailedSplit } = calculateSplits(amount, paidBy, splitAmong, splitType, manualSplit);
+
+    expense.balanceSheet = balanceSheet;
+    expense.detailedSplit = detailedSplit;
+
     await expense.save();
-    res.status(200).json({ message: 'Expense updated successfully', expense });
+    res.status(200).json({ message: "Expense updated successfully", expense });
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
 
-// Delete an expense
+// Delete an Expense
 export const deleteExpense = async (req, res) => {
   const { expenseId } = req.params;
 
   try {
     const expense = await Expense.findById(expenseId);
-    if (!expense) return res.status(404).json({ message: 'Expense not found' });
+    if (!expense) return res.status(404).json({ message: "Expense not found" });
 
-    // Remove expense from the group's expenses array
-    await Group.updateOne(
-      { _id: expense.groupId },
-      { $pull: { expenses: expenseId } }
-    );
+    const group = await Group.findById(expense.groupId);
+    if (group) {
+      group.expenses = group.expenses.filter((id) => id.toString() !== expenseId);
+      await group.save();
+    }
 
-    // Delete the expense
-    await expense.deleteOne();
-
-    res.status(200).json({ message: 'Expense deleted successfully' });
+    await expense.remove();
+    res.status(200).json({ message: "Expense deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
-
-// Calculate balances for a group
 export const calculateGroupBalances = async (req, res) => {
   const { groupId } = req.params;
 
   try {
     const expenses = await Expense.find({ groupId });
+    if (!expenses || expenses.length === 0) {
+      return res.status(404).json({ message: "No expenses found for this group" });
+    }
+
     const balanceSheet = {};
 
     expenses.forEach((expense) => {
-      const { amount, paidBy, splitAmong, splitType } = expense;
-      const splitAmount = splitType === 'equal' ? amount / splitAmong.length : null;
+      const { amount, paidBy, splitAmong, splitType, detailedSplit } = expense;
 
-      paidBy.forEach((payer) => {
-        splitAmong.forEach((user) => {
-          if (payer !== user) {
-            if (!balanceSheet[payer]) balanceSheet[payer] = {};
-            if (!balanceSheet[payer][user]) balanceSheet[payer][user] = 0;
+      if (splitType === "equal") {
+        // Handle equal split
+        const splitAmount = amount / splitAmong.length;
 
-            balanceSheet[payer][user] += splitAmount;
-          }
+        paidBy.forEach((payer) => {
+          splitAmong.forEach((user) => {
+            if (payer.toString() !== user.toString()) {
+              if (!balanceSheet[payer]) balanceSheet[payer] = {};
+              if (!balanceSheet[payer][user]) balanceSheet[payer][user] = 0;
+
+              balanceSheet[payer][user] += splitAmount;
+            }
+          });
         });
-      });
+      } else if (splitType === "amount") {
+        // Handle manual split using `detailedSplit`
+        detailedSplit.forEach(({ from, to, amount }) => {
+          if (!balanceSheet[to]) balanceSheet[to] = {};
+          if (!balanceSheet[to][from]) balanceSheet[to][from] = 0;
+
+          balanceSheet[to][from] += amount;
+        });
+      }
     });
 
-    res.status(200).json(balanceSheet);
+    // Merge balances to simplify results (e.g., net out amounts between users)
+    const simplifiedBalanceSheet = simplifyBalances(balanceSheet);
+
+    res.status(200).json(simplifiedBalanceSheet);
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
 
-// Get expense details by ID
-export const getExpenseById = async (req, res) => {
-  const { expenseId } = req.params;
+// Helper function to simplify balances
+const simplifyBalances = (balanceSheet) => {
+  const simplified = {};
 
-  try {
-    const expense = await Expense.findById(expenseId).populate('paidBy splitAmong');
-    if (!expense) return res.status(404).json({ message: 'Expense not found' });
+  Object.keys(balanceSheet).forEach((payer) => {
+    Object.keys(balanceSheet[payer]).forEach((payee) => {
+      const amountOwed = balanceSheet[payer][payee];
+      const reverseAmount = (simplified[payee]?.[payer] || 0);
 
-    res.status(200).json(expense);
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
-  }
-};
+      if (!simplified[payer]) simplified[payer] = {};
 
-// Split an expense manually (adjust balance)
-export const splitExpenseManually = async (req, res) => {
-  const { expenseId } = req.params;
-  const { balances } = req.body;
-
-  try {
-    const expense = await Expense.findById(expenseId);
-    if (!expense) return res.status(404).json({ message: 'Expense not found' });
-
-    // Validate balances
-    if (!Array.isArray(balances) || balances.length === 0) {
-      return res.status(400).json({ message: 'Balances must be a non-empty array' });
-    }
-
-    // Adjust balances (Example logic)
-    balances.forEach(({ userId, amount }) => {
-      // Logic to adjust user's balance based on amount
-      console.log(`Adjusting balance for ${userId}: ${amount}`);
+      if (amountOwed > reverseAmount) {
+        simplified[payer][payee] = amountOwed - reverseAmount;
+        if (simplified[payee]) delete simplified[payee][payer];
+      } else {
+        if (!simplified[payee]) simplified[payee] = {};
+        simplified[payee][payer] = reverseAmount - amountOwed;
+        delete simplified[payer][payee];
+      }
     });
+  });
 
-    res.status(200).json({ message: 'Expense split manually', balances });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error', error: err.message });
-  }
+  return simplified;
 };
-  */
-
-

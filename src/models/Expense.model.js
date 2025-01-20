@@ -30,6 +30,8 @@ const expenseSchema = new Schema(
        enum: ['equal', 'amount'],
         required: true 
       },
+
+      detailedSplit: { type: Array, default: [] },
    
   },
   { timestamps: true }

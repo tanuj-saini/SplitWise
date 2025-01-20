@@ -1,8 +1,6 @@
 
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { ApiError } from '../utils/ApiError.js';
-import User from '../models/user.model.js';
+import ApiResponse  from '../utils/ApiResponse.js';
 import Transaction from '../models/Transaction.model.js';
 import Group from '../models/group.model.js';
 import Balance from '../models/balance.model.js';
@@ -43,7 +41,7 @@ const createTransaction = asyncHandler(async (req, res) => {
   
     return res
       .status(201)
-      .json(new ApiResponse(201, transaction, "Transaction created successfully"));
+      .json(new ApiResponse(200, transaction, "Transaction created successfully"));
   });
 
 

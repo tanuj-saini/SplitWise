@@ -39,11 +39,11 @@ router.route("/update-group/:groupId").patch(VerifyJWT,updateGroupDetails);
 
 
 
-//Transition Routes
+//Transaction Routes
 router.route('/create-transition').post(VerifyJWT,createTransaction);
-router.route('/update-transition/:transactionId').patch(VerifyJWT,updateTransaction)
+router.route('/update-transition/:transactionId').patch(VerifyJWT,updateTransaction);
 router.route('/get-transactions-groupId/:groupId').get(VerifyJWT,getTransactionsByGroup);
-router.route('/get-transactions-id/:transactionId').post(VerifyJWT,getTransactionById);
+router.route('/get-transactions-id/:transactionId').get(VerifyJWT,getTransactionById);
 
  
 
@@ -69,16 +69,3 @@ router.route('/get-transactions-id/:transactionId').post(VerifyJWT,getTransactio
 export default router
 
 
-
-// //secure routes
-// router.route("/logout").post(VerifyJWT,logoutUser);
-// router.route("/refresh-token").post(refreshAccessToken);
-// router.route("/get-user").get(VerifyJWT,getCurrentUser);
-// router.route("/change-password").post(VerifyJWT,changePassword);
-// router.route("/update-details").patch(VerifyJWT,updateUserDetails);
-// router.route("/update-avatar").patch(VerifyJWT,upload.single('avatar'),updateUserAvatar);
-// router.route("/update-cover-image").patch(VerifyJWT,upload.single('coverImage'),updateUserCoverImage);
-
-// router.route("/c/:username").get(VerifyJWT,getUserChannelProfile);
-
-// router.route("/watch-history").get(VerifyJWT,watchHistorys);

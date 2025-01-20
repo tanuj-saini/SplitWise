@@ -3,7 +3,7 @@
 import { createGroup, getGroupDetails, updateGroupDetails } from '../controllers/group.controller.js';
 import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
 import { VerifyJWT } from '../middlewares/auth.middleware.js';
-
+import { createTransaction,updateTransaction ,getTransactionsByGroup,getTransactionById} from '../controllers/transition.controller.js';
 import {
   calculateGroupBalances,
   createExpense, getExpensesByGroup, updateExpense
@@ -38,8 +38,18 @@ router.route("/get-group/:groupId").get(VerifyJWT,getGroupDetails);
 router.route("/update-group/:groupId").patch(VerifyJWT,updateGroupDetails);
 
 
- // Expence routers
 
+//Transition Routes
+router.route('/create-transition').post(VerifyJWT,createTransaction);
+router.route('/update-transition/:transactionId').patch(VerifyJWT,updateTransaction)
+router.route('/get-transactions-groupId/:groupId').get(VerifyJWT,getTransactionsByGroup);
+router.route('/get-transactions-id/:transactionId').post(VerifyJWT,getTransactionById);
+
+ 
+
+
+
+// Expence routers
  router.route('/create-expence').post(
  // VerifyJWT,
    createExpense); 

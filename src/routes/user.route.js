@@ -1,30 +1,33 @@
  import { Router } from 'express';
  
-import { createGroup, getGroupDetails, updateGroupDetails } from '../controllers/group.controller.js';
-import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
-import { VerifyJWT } from '../middlewares/auth.middleware.js';
-import { createTransaction,updateTransaction ,getTransactionsByGroup,getTransactionById} from '../controllers/transition.controller.js';
-import {
-  calculateGroupBalances,
-  createExpense, getExpensesByGroup, updateExpense
-} from '../controllers/expence.controller.js';
+import { createGroup, getGroupDetails, updateGroupDetails } 
+from '../controllers/group.controller.js';
+import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } 
+from '../controllers/user.controller.js';
+import { VerifyJWT }
+ from '../middlewares/auth.middleware.js';
+import { createTransaction,updateTransaction ,getTransactionsByGroup,getTransactionById} 
+from '../controllers/transition.controller.js';
+import {calculateGroupBalances,createExpense, getExpensesByGroup, updateExpense}
+ from '../controllers/expence.controller.js';
+
+
+ 
+
  const router = Router();
- 
-
-
 
  
 
 
-router.route("/register").post(
-  registerUser
-);
-router.route("/login").post( 
-  loginUser
-);
+
+ 
+
+//User routes
+router.route("/register").post(registerUser);
+router.route("/login").post(loginUser);
 
 
-//scure routes
+//User scure routes
 router.route("/logout").post(VerifyJWT,logoutUser);
 router.route("/get-user").get(VerifyJWT,getUserDetails);
 router.route("/update-details").patch(VerifyJWT,updateUserDetails);

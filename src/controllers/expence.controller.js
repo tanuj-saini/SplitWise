@@ -257,45 +257,77 @@ const updateExpense = asyncHandler(async (req, res) => {
 
 
 
+
 const getExpensesByGroup = asyncHandler(async (req, res) => {
   const { groupId } = req.params;
-  const { minAmount, maxAmount, startDate, endDate, paidBy, splitAmong, description } = req.query;
+  const { minAmount, maxAmount, startDate, endDate, paidBy, splitAmong, description, page, limit } = req.query;
+
+  // Validate groupId
+  if (!mongoose.Types.ObjectId.isValid(groupId)) {
+    return res.status(400).json(new ApiError(400, "Invalid group ID"));
+  }
 
   const query = { groupId };
- if (!mongoose.Types.ObjectId.isValid(groupId)) {
-      return res.status(400).json(new ApiError(400, "Invalid group ID"));
-    }
+
+  // Filter by amount range
   if (minAmount || maxAmount) {
     query.amount = {};
     if (minAmount) query.amount.$gte = Number(minAmount);
     if (maxAmount) query.amount.$lte = Number(maxAmount);
   }
 
+  // Filter by date range
   if (startDate || endDate) {
     query.createdAt = {};
     if (startDate) query.createdAt.$gte = new Date(startDate);
     if (endDate) query.createdAt.$lte = new Date(endDate);
   }
 
+  // Filter by paidBy
   if (paidBy) {
     query.paidBy = { $in: paidBy.split(",") };
   }
 
+  // Filter by splitAmong
   if (splitAmong) {
     query.splitAmong = { $in: splitAmong.split(",") };
   }
 
+  // Filter by description (case-insensitive search)
   if (description) {
     query.description = { $regex: description, $options: "i" };
   }
 
-  const expenses = await Expense.find(query).populate("paidBy splitAmong");
+  // Pagination logic
+  const currentPage = parseInt(page, 10) || 1;
+  const pageSize = parseInt(limit, 10) || 10;
+  const skip = (currentPage - 1) * pageSize;
 
- return res.status(200).json(new ApiResponse( 200,expenses, "Get Expense With Group Id successfully"));
+  // Fetch expenses with selective fields for `paidBy` and `splitAmong`
+  const expenses = await Expense.find(query)
+    .populate("paidBy", "username profilePicture")
+    .populate("splitAmong", "username profilePicture")
+    .skip(skip)
+    .limit(pageSize);
+
+
   
+  // Get total count for pagination metadata
+  const totalExpenses = await Expense.countDocuments(query);
+
+  // Response with expenses and pagination metadata
+  return res.status(200).json(
+    new ApiResponse(200, {
+      expenses,
+      pagination: {
+        currentPage,
+        pageSize,
+        totalExpenses,
+        totalPages: Math.ceil(totalExpenses / pageSize),
+      },
+    }, "Expenses retrieved successfully")
+  );
 });
-
-
 
 
 
@@ -384,8 +416,10 @@ const getExpenseById = asyncHandler(async (req, res) => {
     return res.status(400).json(new ApiError(400, "Invalid Expense ID format"));
   }
 
-  // Find the expense
-  const expense = await Expense.findById(expenseId).populate("paidBy splitAmong");
+  // Find the expense with selective population
+  const expense = await Expense.findById(expenseId)
+    .populate("paidBy", "username profilePicture")
+    .populate("splitAmong", "username profilePicture");
 
   if (!expense) {
     return res.status(404).json(new ApiError(404, "Expense not found"));
@@ -393,6 +427,7 @@ const getExpenseById = asyncHandler(async (req, res) => {
 
   return res.status(200).json(new ApiResponse(200, expense, "Expense retrieved successfully"));
 });
+
 
 
 

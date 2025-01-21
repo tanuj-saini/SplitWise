@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const { Schema, model } = mongoose;
 
@@ -32,6 +33,7 @@ const groupSchema = new Schema(
   { timestamps: true }
 );
 
+groupSchema.plugin(aggregatePaginate);
 
 groupSchema.path('members').validate(function (members) {
   return members.length > 1;

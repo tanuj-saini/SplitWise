@@ -76,50 +76,146 @@ const createGroup = asyncHandler(async (req, res) => {
 
 
 
-const getGroupDetails = asyncHandler(async (req, res) => {
-    const { groupId } = req.params;
-    if (!req.user || !req.user._id) {
-        return res.status(401).json(new ApiError(401, "Unauthorized user"));
-      }
+// const getGroupDetails = asyncHandler(async (req, res) => {
+//     const { groupId } = req.params;
+//     if (!req.user || !req.user._id) {
+//         return res.status(401).json(new ApiError(401, "Unauthorized user"));
+//       }
     
     
-    if (!mongoose.Types.ObjectId.isValid(groupId)) {
-      return res.status(400).json(new ApiError(400, "Invalid group ID"));
-    }
+//     if (!mongoose.Types.ObjectId.isValid(groupId)) {
+//       return res.status(400).json(new ApiError(400, "Invalid group ID"));
+//     }
   
     
-    const group = await Group.findById(groupId)
-      .populate({
-        path: "members",
-        select: "username profilePicture phoneNumber", 
-      })
-      .populate({
-        path: "expenses",
-        select: "description amount paidBy splitAmong splitType createdAt", 
-        populate: {
-          path: "paidBy splitAmong",
-          select: "username profilePicture", 
-        },
-      });
+//     const group = await Group.findById(groupId)
+//       .populate({
+//         path: "members",
+//         select: "username profilePicture phoneNumber", 
+//       })
+//       .populate({
+//         path: "expenses",
+//         select: "description amount paidBy splitAmong splitType createdAt", 
+//         populate: {
+//           path: "paidBy splitAmong",
+//           select: "username profilePicture", 
+//         },
+//       });
   
     
-    if (!group) {
-      return res.status(404).json(new ApiError(404, "Group not found"));
-    }
+//     if (!group) {
+//       return res.status(404).json(new ApiError(404, "Group not found"));
+//     }
   
    
-    const isMember = group.members.some(
-      (member) => member._id.toString() === req.user._id.toString()
-    );
-    if (!isMember) {
-      return res.status(403).json(new ApiError(403, "Access denied to this group"));
-    }
+//     const isMember = group.members.some(
+//       (member) => member._id.toString() === req.user._id.toString()
+//     );
+//     if (!isMember) {
+//       return res.status(403).json(new ApiError(403, "Access denied to this group"));
+//     }
   
     
-    return res
-      .status(200)
-      .json(new ApiResponse(200, group, "Group details retrieved successfully"));
+//     return res
+//       .status(200)
+//       .json(new ApiResponse(200, group, "Group details retrieved successfully"));
+//   });
+const getGroupDetails = asyncHandler(async (req, res) => {
+  const { groupId } = req.params;
+  const { page = 1, limit = 10 } = req.query; // Default pagination values
+
+  if (!req.user || !req.user._id) {
+    return res.status(401).json(new ApiError(401, "Unauthorized user"));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(groupId)) {
+    return res.status(400).json(new ApiError(400, "Invalid group ID"));
+  }
+
+  // Fetch the group to ensure it exists and user has access
+  const group = await Group.findById(groupId).populate({
+    path: "members",
+    select: "username profilePicture phoneNumber",
   });
+
+  if (!group) {
+    return res.status(404).json(new ApiError(404, "Group not found"));
+  }
+
+  const isMember = group.members.some(
+    (member) => member._id.toString() === req.user._id.toString()
+  );
+  if (!isMember) {
+    return res.status(403).json(new ApiError(403, "Access denied to this group"));
+  }
+
+  // Pagination for expenses
+  const aggregate = Group.aggregate([
+    { $match: { _id: new mongoose.Types.ObjectId(groupId) } },
+    { $unwind: "$expenses" }, // Unwind expenses to paginate them
+    {
+      $lookup: {
+        from: "expenses", // Name of the expenses collection
+        localField: "expenses",
+        foreignField: "_id",
+        as: "expenseDetails",
+      },
+    },
+    { $unwind: "$expenseDetails" },
+    {
+      $lookup: {
+        from: "users", // Lookup for `paidBy` field in expenses
+        localField: "expenseDetails.paidBy",
+        foreignField: "_id",
+        as: "expenseDetails.paidBy",
+      },
+    },
+    {
+      $lookup: {
+        from: "users", // Lookup for `splitAmong` field in expenses
+        localField: "expenseDetails.splitAmong",
+        foreignField: "_id",
+        as: "expenseDetails.splitAmong",
+      },
+    },
+    {
+      $project: {
+        "expenseDetails._id": 1,
+        "expenseDetails.description": 1,
+        "expenseDetails.amount": 1,
+        "expenseDetails.splitType": 1,
+        "expenseDetails.createdAt": 1,
+        "expenseDetails.paidBy": {
+          _id: 1,
+          username: 1,
+          profilePicture: 1,
+        },
+        "expenseDetails.splitAmong": {
+          _id: 1,
+          username: 1,
+          profilePicture: 1,
+        },
+      },
+    },
+  ]);
+
+  const options = {
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
+  };
+
+  const paginatedExpenses = await Group.aggregatePaginate(aggregate, options);
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      group,
+      expenses: paginatedExpenses.docs,
+      totalPages: paginatedExpenses.totalPages,
+      totalDocs: paginatedExpenses.totalDocs,
+    }, "Group details retrieved successfully")
+  );
+});
+
   
 
   const updateGroupDetails = asyncHandler(async (req, res) => {

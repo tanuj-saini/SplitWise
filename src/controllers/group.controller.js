@@ -195,8 +195,64 @@ const getGroupDetails = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, group, "Group details updated successfully"));
   });
 
+
+  const getUserGroups = asyncHandler(async (req, res) => {
+    // Ensure the user is authenticated
+    if (!req.user || !req.user._id) {
+      return res.status(401).json(new ApiError(401, "Unauthorized user"));
+    }
   
-  export { createGroup ,getGroupDetails,updateGroupDetails };
+    try {
+      // Find groups where the authenticated user is a member
+      const groups = await Group.find({ members: req.user._id })
+        .populate({
+          path: "members",
+          select: "username profilePicture",
+        })
+        .populate({
+          path: "createdBy",
+          select: "username",
+        });
+  
+      // Respond with the list of groups
+      return res.status(200).json(new ApiResponse(200, groups, "Groups retrieved successfully"));
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      return res.status(500).json(new ApiError(500, "An error occurred while fetching groups"));
+    }
+  });
+  // API to check if a phone number exists
+const checkPhoneNumber = asyncHandler(async (req, res) => {
+  const { phoneNumber } = req.body;
+
+  // Validate input
+  if (!phoneNumber || typeof phoneNumber !== "string" || phoneNumber.trim() === "") {
+    return res.status(400).json(new ApiError(400, "Phone number is required and must be valid"));
+  }
+
+  try {
+    // Check if the phone number exists in the database
+    const user = await User.findOne({ phoneNumber: phoneNumber.trim() });
+
+    if (user) {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, { exists: true }, "Phone number exists"));
+    } else {
+      return res
+        .status(200)
+        .json(new ApiResponse(200, { exists: false }, "Phone number does not exist"));
+    }
+  } catch (error) {
+    console.error("Error checking phone number:", error);
+    return res.status(500).json(new ApiError(500, "An error occurred while checking the phone number"));
+  }
+});
+
+
+  
+  
+  export { createGroup ,getGroupDetails,updateGroupDetails,getUserGroups,checkPhoneNumber };
   
 
 

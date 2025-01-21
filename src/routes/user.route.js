@@ -1,7 +1,7 @@
  import { Router } from 'express';
  
 import { calculateGroupBalances, createExpense, getExpenseById, getExpensesByGroup, updateExpense } from '../controllers/expence.controller.js';
-import { createGroup, getGroupDetails, updateGroupDetails } from '../controllers/group.controller.js';
+import { createGroup, getGroupDetails, updateGroupDetails ,getUserGroups,checkPhoneNumber} from '../controllers/group.controller.js';
 import { createTransaction, getTransactionById, getTransactionsByGroup, updateTransaction } from '../controllers/transition.controller.js';
 import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
 import { updateBalanceSheet } from '../controllers/balance.controller.js'
@@ -35,6 +35,8 @@ router.route("/change-password").post(VerifyJWT,changePassword);
 router.route("/create-group").post(VerifyJWT,createGroup);
 router.route("/get-group/:groupId").get(VerifyJWT,getGroupDetails);
 router.route("/update-group/:groupId").patch(VerifyJWT,updateGroupDetails);
+router.route("/get-group-userId").get(VerifyJWT,getUserGroups);
+router.route("/check-phoneNumber").get(checkPhoneNumber)
 
 
 

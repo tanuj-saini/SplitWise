@@ -200,35 +200,3 @@ const getGroupDetails = asyncHandler(async (req, res) => {
   
 
 
-
-
-//   //expense
-//   export const addExpense = asyncHandler(async (req, res) => {
-//     const { groupId, description, amount, paidBy, splitAmong, splitType } = req.body;
-//     const group = await Group.findById(groupId);
-//     if (!group) {
-//       return res.status(404).json(new ApiError(404, "Group not found"));
-//     }
-//     const expense = await Expense.create({ groupId, description, amount, paidBy, splitAmong, splitType });
-//     group.expenses.push(expense._id);
-//     await group.save();
-//     res.status(201).json(new ApiResponse(201, expense, "Expense added successfully"));
-//   });
-
-  
-//   // balamce
-//   export const getBalanceSheet = asyncHandler(async (req, res) => {
-//     const balances = await Balance.find({ groupId: req.params.groupId }).populate("owner receiver");
-//     res.status(200).json(new ApiResponse(200, balances, "Balance sheet fetched successfully"));
-//   });
-  
-//   export const markBalanceAsPaid = asyncHandler(async (req, res) => {
-//     const balance = await Balance.findById(req.params.id);
-//     if (!balance) {
-//       return res.status(404).json(new ApiError(404, "Balance not found"));
-//     }
-//     balance.markAsPaid = true;
-//     await balance.save();
-//     res.status(200).json(new ApiResponse(200, balance, "Balance marked as paid"));
-//   });
-  

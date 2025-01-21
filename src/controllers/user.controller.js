@@ -76,7 +76,8 @@ const registerUser = asyncHandler(async (req, res) => {
     }
   
     const user = await User.create({ username, profilePicture, phoneNumber, password });
-    res.status(201).json(new ApiResponse(201, user, "User registered successfully"));
+    const newUser = await User.findById(user._id).select("-password ");
+    res.status(201).json(new ApiResponse(201, newUser, "User registered successfully"));
   });
 
 

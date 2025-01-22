@@ -186,6 +186,7 @@ const getGroupDetails = asyncHandler(async (req, res) => {
       $project: {
         "expenseDetails._id": 1,
         "expenseDetails.description": 1,
+        "expenseDetails.detailedSplit": 1,
         "expenseDetails.amount": 1,
         "expenseDetails.splitType": 1,
         "expenseDetails.createdAt": 1,

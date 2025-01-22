@@ -103,11 +103,6 @@ const createExpense = asyncHandler(async (req, res) => {
   if (!group || group==null) 
   return res.status(404).json(new ApiError(404, "Group not found"));
 
-
- 
-
-
-
   // Step 2: Validate Users in Group
   const invalidUsers = validateGroupMembers(group.members, [...paidBy, ...splitAmong]);
   if (invalidUsers.length > 0) {

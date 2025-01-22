@@ -52,25 +52,11 @@ router.route('/get-transactions-id/:transactionId').get(VerifyJWT,getTransaction
 
 
 // Expence routers
- router.route('/create-expence').post(
- // VerifyJWT,
-   createExpense); 
-
-   router.route('/getExpensesByGroup/:groupId').get(
-    // VerifyJWT,
-    getExpensesByGroup); 
-
-    router.route('/update-expence/:expenseId').put(
-      // VerifyJWT,
-      updateExpense);
-
-      router.route('/groupbalance/:groupId/balances').get(
-        // VerifyJWT,
-        calculateGroupBalances);
-
-        router.route('/getExpenseById/:expenseId').get(
-          //VerifyJWT,
-          getExpenseById);
+ router.route('/create-expence').post(VerifyJWT,createExpense); 
+ router.route('/getExpensesByGroup/:groupId').get(getExpensesByGroup); 
+ router.route('/update-expence/:expenseId').put( VerifyJWT,  updateExpense);
+ router.route('/groupbalance/:groupId/balances').get( VerifyJWT, calculateGroupBalances);
+ router.route('/getExpenseById/:expenseId').get(VerifyJWT, getExpenseById);
 
 
 export default router

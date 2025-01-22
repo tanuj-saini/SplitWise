@@ -333,7 +333,7 @@ const checkPhoneNumber = asyncHandler(async (req, res) => {
     if (user) {
       return res
         .status(200)
-        .json(new ApiResponse(200, { exists: true }, "Phone number exists"));
+        .json(new ApiResponse(200, { exists: true ,userId: user._id}, "Phone number exists"));
     } else {
       return res
         .status(200)

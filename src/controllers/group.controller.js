@@ -136,6 +136,10 @@ const getGroupDetails = asyncHandler(async (req, res) => {
   const group = await Group.findById(groupId).populate({
     path: "members",
     select: "username profilePicture phoneNumber",
+  })
+  .populate({
+    path: "createdBy",
+    select: "username", // You can adjust these fields as needed
   });
 
   if (!group) {
@@ -189,11 +193,13 @@ const getGroupDetails = asyncHandler(async (req, res) => {
           _id: 1,
           username: 1,
           profilePicture: 1,
+          phoneNumber: 1,
         },
         "expenseDetails.splitAmong": {
           _id: 1,
           username: 1,
           profilePicture: 1,
+          phoneNumber: 1,
         },
       },
     },

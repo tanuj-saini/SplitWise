@@ -34,7 +34,7 @@ router.route("/change-password").post(VerifyJWT,changePassword);
 //Group routes
 router.route("/create-group").post(VerifyJWT,createGroup);
 router.route("/get-group/:groupId").get(VerifyJWT,getGroupDetails);
-router.route("/update-group/:groupId").patch(VerifyJWT,updateGroupDetails);
+router.route("/update-group/:groupId").post(VerifyJWT,updateGroupDetails);
 router.route("/get-group-userId").get(VerifyJWT,getUserGroups);
 router.route("/check-phoneNumber").post(checkPhoneNumber)
 

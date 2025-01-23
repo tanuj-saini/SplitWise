@@ -310,7 +310,7 @@ const getGroupDetails = asyncHandler(async (req, res) => {
       const groups = await Group.find({ members: req.user._id })
         .populate({
           path: "members",
-          select: "username profilePicture",
+          select: "username profilePicture phoneNumber",
         })
         .populate({
           path: "createdBy",

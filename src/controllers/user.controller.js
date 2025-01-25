@@ -64,18 +64,21 @@ const generateRefreshTokenandAccessToken = async (userId) => {
 
 // Register a new user
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, profilePicture, phoneNumber, password } = req.body;
+    const { username, profilePicture, phoneNumber, password, upiId } = req.body;
   
-    if (!username || !profilePicture || !phoneNumber || !password) {
+    if (!username || !profilePicture || !phoneNumber || !password || !upiId) {
       return res.status(400).json(new ApiError(400, "All fields are required"));
     }
   
-    const existingUser = await User.findOne({ phoneNumber });
+    const existingUser = await User.findOne({ 
+      phoneNumber, 
+      upiId 
+    });
     if (existingUser) {
       return res.status(400).json(new ApiError(400, "Phone number already in use"));
     }
   
-    const user = await User.create({ username, profilePicture, phoneNumber, password });
+    const user = await User.create({ username, profilePicture, phoneNumber, password,upiId });
     const newUser = await User.findById(user._id).select("-password ");
     res.status(201).json(new ApiResponse(201, newUser, "User registered successfully"));
   });

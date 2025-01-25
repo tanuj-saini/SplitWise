@@ -33,6 +33,8 @@ const createGroup = asyncHandler(async (req, res) => {
     if (uniqueMembers.length < 1) {
       return res.status(400).json(new ApiError(400, "At least one member (besides yourself) is required to create a group"));
     }
+
+
   
     
     const memberCount = await User.aggregate([
@@ -135,7 +137,7 @@ const getGroupDetails = asyncHandler(async (req, res) => {
   // Fetch the group to ensure it exists and user has access
   const group = await Group.findById(groupId).populate({
     path: "members",
-    select: "username profilePicture phoneNumber",
+    select: "username profilePicture phoneNumber upiId",
   })
   .populate({
     path: "createdBy",
@@ -195,12 +197,14 @@ const getGroupDetails = asyncHandler(async (req, res) => {
           username: 1,
           profilePicture: 1,
           phoneNumber: 1,
+          upiId: 1,
         },
         "expenseDetails.splitAmong": {
           _id: 1,
           username: 1,
           profilePicture: 1,
           phoneNumber: 1,
+          upiId: 1
         },
       },
     },
@@ -310,7 +314,7 @@ const getGroupDetails = asyncHandler(async (req, res) => {
       const groups = await Group.find({ members: req.user._id })
         .populate({
           path: "members",
-          select: "username profilePicture phoneNumber",
+          select: "username profilePicture phoneNumber upiId",
         })
         .populate({
           path: "createdBy",

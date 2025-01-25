@@ -300,8 +300,8 @@ const getExpensesByGroup = asyncHandler(async (req, res) => {
 
   // Fetch expenses with selective fields for `paidBy` and `splitAmong`
   const expenses = await Expense.find(query)
-    .populate("paidBy", "username profilePicture")
-    .populate("splitAmong", "username profilePicture")
+    .populate("paidBy", "username profilePicture upiId")
+    .populate("splitAmong", "username profilePicture upiId")
     .skip(skip)
     .limit(pageSize);
 
@@ -413,8 +413,8 @@ const getExpenseById = asyncHandler(async (req, res) => {
 
   // Find the expense with selective population
   const expense = await Expense.findById(expenseId)
-    .populate("paidBy", "username profilePicture")
-    .populate("splitAmong", "username profilePicture");
+    .populate("paidBy", "username profilePicture upiId")
+    .populate("splitAmong", "username profilePicture upiId");
 
   if (!expense) {
     return res.status(404).json(new ApiError(404, "Expense not found"));

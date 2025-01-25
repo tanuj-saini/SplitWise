@@ -15,6 +15,10 @@ const userSchema = new Schema(
       type: String,
       required: true
      },
+     upiId: { 
+      type: String,
+      required: true
+     },
     phoneNumber: { 
       type: String,
        unique: true ,

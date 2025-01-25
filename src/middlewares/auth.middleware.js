@@ -11,7 +11,7 @@ export const VerifyJWT = asyncHandler(async (req, res, next) => {
     try {
         // Retrieve token from cookies or authorization header
         const token = req.cookies?.accessToken || req.headers["authorization"]?.replace("Bearer ", "");
-        console.log(token);
+       
 
         if (!token) {
             // No token provided

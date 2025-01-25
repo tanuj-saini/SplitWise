@@ -110,8 +110,8 @@ const createTransaction = asyncHandler(async (req, res) => {
     }
   
     const transaction = await Transaction.findById(transactionId)
-      .populate("payer", "username profilePicture")
-      .populate("payee", "username profilePicture")
+      .populate("payer", "username profilePicture upiId")
+      .populate("payee", "username profilePicture upiId")
       .populate("groupId", "name")
       .populate("expenseId", "description amount")
       .populate("balanceId", "totalAmount remainingAmount");

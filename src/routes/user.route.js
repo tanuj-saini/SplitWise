@@ -51,7 +51,6 @@ router.route('/get-transactions-id/:transactionId').get(VerifyJWT,getTransaction
  router.route('/update-balance').post(VerifyJWT,updateBalanceSheet);
  router.route("/getBalanceId").post(VerifyJWT,getBalanceId);
 
-
 // Expence routers
  router.route('/create-expence').post(VerifyJWT,createExpense); 
  router.route('/getExpensesByGroup/:groupId').get(getExpensesByGroup); 

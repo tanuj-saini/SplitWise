@@ -59,7 +59,7 @@ const getBalanceId = asyncHandler(async (req, res) => {
     const revicerId = req.user._id;
 
     // Validate required fields
-    if (!groupId || !expenseId || !ownerId) {
+    if (!groupId || !expenseId || !revicerId) {
       return res.status(400).json(new ApiError(404, 'Missing required fields'));
 
     }
@@ -68,8 +68,7 @@ const getBalanceId = asyncHandler(async (req, res) => {
     const balance = await Balance.findOne({
       groupId,
       expenseId,
-      
-reciver: revicerId
+      reciver: revicerId
     });
 
     // Check if balance record exists

@@ -56,7 +56,7 @@ const getBalanceId = asyncHandler(async (req, res) => {
       return res.status(401).json(new ApiError(401, "Unauthorized user"));
     }
     const { groupId, expenseId } = req.body;
-    const ownerId = req.user._id;
+    const revicerId = req.user._id;
 
     // Validate required fields
     if (!groupId || !expenseId || !ownerId) {
@@ -68,7 +68,8 @@ const getBalanceId = asyncHandler(async (req, res) => {
     const balance = await Balance.findOne({
       groupId,
       expenseId,
-      owner: ownerId
+      
+reciver: revicerId
     });
 
     // Check if balance record exists

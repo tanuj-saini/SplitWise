@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    image: node:20
+    container_name: splitwise-app
+    working_dir: /app
+    env_file: 
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - .:/app
+    command: ["npm", "start"]
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example

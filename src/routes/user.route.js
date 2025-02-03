@@ -6,6 +6,8 @@ import { createTransaction, getTransactionById, getTransactionsByGroup, updateTr
 import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
 import { updateBalanceSheet ,getBalanceId} from '../controllers/balance.controller.js'
 import { VerifyJWT } from '../middlewares/auth.middleware.js';
+import { getMessgeGroups } from '../controllers/message.controller.js';
+
 
 
  
@@ -57,6 +59,9 @@ router.route('/get-transactions-id/:transactionId').get(VerifyJWT,getTransaction
  router.route('/update-expence/:expenseId').put( VerifyJWT,  updateExpense);
  router.route('/groupbalance/:groupId/balances').get( VerifyJWT, calculateGroupBalances);
  router.route('/getExpenseById/:expenseId').get(VerifyJWT, getExpenseById);
+
+ //Message routes
+ router.route('/get-message/:groupId').get(VerifyJWT,getMessgeGroups);
 
 
 export default router

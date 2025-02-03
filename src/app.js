@@ -128,12 +128,17 @@
 // app.use("/api/v1/user", router);
 
 // export { app };
+import dotenv from "dotenv";
 import cors from "cors";
 import express from "express";
 import { Server as SocketIOServer } from "socket.io";
 import http from "http";
 import Redis from "ioredis";
-import { produceMessage, startMessageConsumer } from "./kafks.js";
+import { produceMessage, startMessageConsumer } from "./kafks.js"; // Ensure this path is correct
+import connectDB from "./db/index.js"; // Ensure this path is correct
+import router from "./routes/user.route.js"; // Ensure this path is correct
+
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -170,7 +175,7 @@ sub.on("error", handleRedisError("Subscriber"));
 const corsOptions = {
     origin: process.env.NODE_ENV === "production" 
         ? "https://splitwise-242x.onrender.com" 
-        : ["http://localhost:3000", "http://127.0.0.1:3000"],
+        : ["http://10.0.2.2:44820","http://localhost:3001", "http://127.0.0.1:3001"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 };
@@ -180,9 +185,9 @@ app.use(cors(corsOptions));
 // Improved Socket.IO configuration
 const io = new SocketIOServer(server, {
     cors: corsOptions,
-    path: "/socket.io/",
-    transports: ["websocket", "polling"],
-    allowEIO3: true,
+    path: "/socket.io/", // Ensure this matches the client-side path
+    transports: ["websocket", "polling"], // Allow both WebSocket and polling
+    allowEIO3: true, // Enable compatibility with Socket.IO v3 clients
     pingTimeout: 60000,
     pingInterval: 25000,
     cookie: false
@@ -300,15 +305,8 @@ app.get("/health", (req, res) => {
 });
 
 // Routes
-import router from "./routes/user.route.js";
 app.use("/api/v1/user", router);
 
-// Server startup
-// const PORT = process.env.PORT || 3001;
-// server.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`);
-//     console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-// });
 
 // Cleanup on shutdown
 process.on("SIGINT", async () => {

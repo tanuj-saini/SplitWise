@@ -25,8 +25,8 @@ export const createMessageService = async (messageData) => {
         createdBy,
         groupId
     });
-    console.log("Yes Save DataBase");
-    console.log(newMessage);
+   
+
 
     await newMessage.save();
     return newMessage;

@@ -49,7 +49,7 @@ export async function startMessageConsumer(groupId) {
       
       if (!message) return;
     
-      console.log(`New message received `); // <-- Fixed here
+    
     
       try {
         // Save the message to the database with relevant fields

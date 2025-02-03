@@ -34,7 +34,7 @@ const updateBalanceSheet = asyncHandler(async (req, res) => {
     }
 
     const receiverId = balance.owner.toString();
-    console.log(receiverId)
+
     if (!expense.paidBy.some(id => id.toString() === receiverId)) {
       expense.paidBy = [...expense.paidBy, receiverId];
 

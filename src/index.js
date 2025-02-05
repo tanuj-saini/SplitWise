@@ -183,7 +183,7 @@ const PORT = process.env.PORT || 3000;
 
 connectDB()
     .then(() => {
-        console.log("Database connected");
+        // console.log("Database connected");
     })
     .catch((e) => {
         console.error("Database connection error:", e);
@@ -226,7 +226,7 @@ const clients = new Map();
 
 // Subscribe to Redis channels
 io.on("connection", (socket) => {
-    console.log("Connected:", socket.id);
+   
 
     socket.on("Id", (data) => {
         const { userId, groupId } = data; // Extract values safely
@@ -253,7 +253,7 @@ io.on("connection", (socket) => {
 
         startMessageConsumer(groupId).catch(console.error);
 
-        console.log(`User ${userId} registered in group ${groupId}.`);
+      
     });
 
     socket.on("disconnect", () => {
@@ -277,7 +277,7 @@ io.on("connection", (socket) => {
             }
         });
 
-        console.log(`User disconnected: ${socket.id}`);
+       
     });
 
     socket.on("messageEvent", async (msg) => {
@@ -289,9 +289,9 @@ io.on("connection", (socket) => {
         // Ensure the subscriber is subscribed to the groupId channel
         sub.subscribe(groupId, (err) => {
             if (err) {
-                console.error(`Subscription error for ${groupId}:`, err);
+                // console.error(`Subscription error for ${groupId}:`, err);
             } else {
-                console.log(`Subscribed to Redis channel: ${groupId}`);
+                // console.log(`Subscribed to Redis channel: ${groupId}`);
             }
         });
     });
@@ -314,7 +314,7 @@ sub.on("message", async (channel, message) => {
                     socket.emit("messageEvent", parsedMessage);
                 });
 
-                
+
             }
         });
     }

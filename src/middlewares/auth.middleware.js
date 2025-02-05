@@ -46,7 +46,7 @@ export const VerifyJWT = asyncHandler(async (req, res, next) => {
             }
         }
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(new ApiError(401, error.message || "Unauthorized"));
     }
 });

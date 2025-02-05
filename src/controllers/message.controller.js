@@ -113,6 +113,7 @@ const getMessgeGroups = asyncHandler(async (req, res) => {
           groupId: 1,
           createdAt: 1,
           updatedAt: 1,
+          'createdBy._id': 1, // Include the user ID
           'createdBy.username': 1,
           'createdBy.profilePicture': 1,
           'createdBy.phoneNumber': 1,

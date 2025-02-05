@@ -338,6 +338,8 @@ sub.on("message", async (channel, message) => {
         userList.forEach((userId) => {
             if (groupClients.has(userId)) {
                 groupClients.get(userId).forEach((socket) => {
+                    console.log("message");
+                    console.log(userId);
                     socket.emit("messageEvent", parsedMessage);
                 });
 

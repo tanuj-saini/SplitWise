@@ -313,6 +313,8 @@ sub.on("message", async (channel, message) => {
                 groupClients.get(userId).forEach((socket) => {
                     socket.emit("messageEvent", parsedMessage);
                 });
+
+                
             }
         });
     }

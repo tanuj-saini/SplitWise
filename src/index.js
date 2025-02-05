@@ -256,30 +256,57 @@ io.on("connection", (socket) => {
       
     });
 
-    socket.on("disconnect", () => {
-        // Remove the socket from all groups and users
-        clients.forEach((groupClients, groupId) => {
-            groupClients.forEach((sockets, userId) => {
-                groupClients.set(
-                    userId,
-                    sockets.filter((s) => s !== socket)
-                );
+    // socket.on("disconnect", () => {
+    //     // Remove the socket from all groups and users
+    //     clients.forEach((groupClients, groupId) => {
+    //         groupClients.forEach((sockets, userId) => {
+    //             groupClients.set(
+    //                 userId,
+    //                 sockets.filter((s) => s !== socket)
+    //             );
 
-                // If the user has no more sockets, remove them
-                if (groupClients.get(userId).length === 0) {
-                    groupClients.delete(userId);
+    //             // If the user has no more sockets, remove them
+    //             if (groupClients.get(userId).length === 0) {
+    //                 groupClients.delete(userId);
+    //             }
+    //         });
+
+    //         // If the group has no more users, remove it
+    //         if (groupClients.size === 0) {
+    //             clients.delete(groupId);
+    //         }
+    //     });
+
+       
+    // });
+    socket.on("disconnect", () => {
+        // Iterate over all groups
+        clients.forEach((groupClients, groupId) => {
+            // Collect users to remove
+            const usersToRemove = [];
+    
+            groupClients.forEach((sockets, userId) => {
+                // Filter out the disconnected socket
+                const updatedSockets = sockets.filter((s) => s !== socket);
+
+    
+                if (updatedSockets.length === 0) {
+                    usersToRemove.push(userId); // Mark user for removal
+                } else {
+                    groupClients.set(userId, updatedSockets); // Update sockets
                 }
             });
-
-            // If the group has no more users, remove it
+            console.log(usersToRemove);
+            // Remove users with no sockets
+            usersToRemove.forEach((userId) => groupClients.delete(userId));
+    
+            // Remove empty groups
             if (groupClients.size === 0) {
                 clients.delete(groupId);
             }
         });
-
-       
     });
-
+    
     socket.on("messageEvent", async (msg) => {
         const { groupId } = msg;
 

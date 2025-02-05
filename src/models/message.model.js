@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-// import aggregatePaginate from "mongoose-aggregate-paginate-v2";
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const { Schema, model } = mongoose;
 
@@ -26,7 +26,7 @@ const messageSchema = new Schema(
   },
   { timestamps: true }
 );
-
+messageSchema.plugin(aggregatePaginate);
 
 const Message = model('Message', messageSchema);
 

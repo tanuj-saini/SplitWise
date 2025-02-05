@@ -167,8 +167,6 @@
 // //     process.exit(1);
 // // })
 
-
-
 import dotenv from "dotenv";
 import connectDB from "./db/index.js";
 import cors from "cors";
@@ -311,7 +309,7 @@ sub.on("message", async (channel, message) => {
     if (groupClients) {
         // Forward the message to all users in the group except the sender
         userList.forEach((userId) => {
-            if (userId !== createdBy && groupClients.has(userId)) {
+            if (groupClients.has(userId)) {
                 groupClients.get(userId).forEach((socket) => {
                     socket.emit("messageEvent", parsedMessage);
                 });
@@ -336,11 +334,3 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use("/api/v1/user", router);
 
 export { app };
-
-
-
-
-
-
-
-

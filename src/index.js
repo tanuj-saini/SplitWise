@@ -1,3 +1,5 @@
+
+
 // import dotenv from "dotenv";
 // import connectDB from "./db/index.js";
 // import cors from "cors";
@@ -12,12 +14,15 @@
 // const app = express();
 // const PORT = process.env.PORT || 3000;
 
-// connectDB().then(() => {
-//     console.log("Database connected");
-// }).catch((e) => {
-//     console.error("Database connection error:", e);
-//     process.exit(1);
-// });
+// connectDB()
+//     .then(() => {
+//         // console.log("Database connected");
+//     })
+//     .catch((e) => {
+//         console.error("Database connection error:", e);
+//         process.exit(1);
+//     });
+
 // const server = http.createServer(app);
 
 // const redisOptions = {
@@ -49,124 +54,150 @@
 //     },
 // });
 
-
-// const clients = {};
+// // Nested structure to store clients: groupId -> userId -> sockets
+// const clients = new Map();
 
 // // Subscribe to Redis channels
-
 // io.on("connection", (socket) => {
-//     console.log("Connected:", socket.id);
-
    
+
 //     socket.on("Id", (data) => {
-        
-    
 //         const { userId, groupId } = data; // Extract values safely
-    
-        
-    
+
 //         if (!userId || !groupId) {
 //             console.error("Invalid userId or groupId received.");
 //             return; // Stop execution if data is missing
 //         }
-    
-//         if (!clients[userId]) {
-//             clients[userId] = [];
+
+//         // Initialize the group if it doesn't exist
+//         if (!clients.has(groupId)) {
+//             clients.set(groupId, new Map());
 //         }
-//         clients[userId].push(socket);
-    
+
+//         const groupClients = clients.get(groupId);
+
+//         // Initialize the user if it doesn't exist
+//         if (!groupClients.has(userId)) {
+//             groupClients.set(userId, []);
+//         }
+
+//         // Add the socket to the user's list
+//         groupClients.get(userId).push(socket);
+
 //         startMessageConsumer(groupId).catch(console.error);
-    
-//         console.log(`User ${userId} registered in group ${groupId}.`);
+
+      
 //     });
 
+//     // socket.on("disconnect", () => {
+//     //     // Remove the socket from all groups and users
+//     //     clients.forEach((groupClients, groupId) => {
+//     //         groupClients.forEach((sockets, userId) => {
+//     //             groupClients.set(
+//     //                 userId,
+//     //                 sockets.filter((s) => s !== socket)
+//     //             );
+
+//     //             // If the user has no more sockets, remove them
+//     //             if (groupClients.get(userId).length === 0) {
+//     //                 groupClients.delete(userId);
+//     //             }
+//     //         });
+
+//     //         // If the group has no more users, remove it
+//     //         if (groupClients.size === 0) {
+//     //             clients.delete(groupId);
+//     //         }
+//     //     });
+
+       
+//     // });
 //     socket.on("disconnect", () => {
-//         Object.keys(clients).forEach((userId) => {
-//             clients[userId] = clients[userId].filter((s) => s !== socket);
-//             if (clients[userId].length === 0) {
-//                 delete clients[userId];
+//         // Iterate over all groups
+//         clients.forEach((groupClients, groupId) => {
+//             // Collect users to remove
+//             const usersToRemove = [];
+    
+//             groupClients.forEach((sockets, userId) => {
+//                 // Filter out the disconnected socket
+//                 const updatedSockets = sockets.filter((s) => s !== socket);
+
+    
+//                 if (updatedSockets.length === 0) {
+//                     usersToRemove.push(userId); // Mark user for removal
+//                 } else {
+//                     groupClients.set(userId, updatedSockets); // Update sockets
+//                 }
+//             });
+//             console.log(usersToRemove);
+//             // Remove users with no sockets
+//             usersToRemove.forEach((userId) => groupClients.delete(userId));
+    
+//             // Remove empty groups
+//             if (groupClients.size === 0) {
+//                 clients.delete(groupId);
 //             }
 //         });
-//         console.log(`User disconnected: ${socket.id}`);
 //     });
-
+    
 //     socket.on("messageEvent", async (msg) => {
-        
 //         const { groupId } = msg;
+
 //         // Publish the message to the Redis channel named after the groupId
 //         pub.publish(groupId, JSON.stringify(msg));
-        
+
 //         // Ensure the subscriber is subscribed to the groupId channel
 //         sub.subscribe(groupId, (err) => {
 //             if (err) {
-//                 console.error(`Subscription error for ${groupId}:`, err);
+//                 // console.error(`Subscription error for ${groupId}:`, err);
 //             } else {
-//                 console.log(`Subscribed to Redis channel: ${groupId}`);
+//                 // console.log(`Subscribed to Redis channel: ${groupId}`);
 //             }
 //         });
 //     });
 // });
 
 // // Handle messages from Redis
-// sub.on('message', async(channel, message) => {
-    
+// sub.on("message", async (channel, message) => {
 //     const parsedMessage = JSON.parse(message);
 //     await produceMessage(message);
 //     const { userList, message: msg, createdBy, groupId } = parsedMessage;
 
-//     // Forward the message to all users in the group except the sender
-//     userList.forEach((userId) => {
-//         if (
-//             // userId !== createdBy && 
-//             clients[userId]) {
-//             clients[userId].forEach((socket) => {
-                
-//                 socket.emit("messageEvent", parsedMessage);
-//             });
-//         }
-//     });
+//     // Get the group's clients
+//     const groupClients = clients.get(groupId);
+
+//     if (groupClients) {
+//         // Forward the message to all users in the group except the sender
+//         userList.forEach((userId) => {
+//             if (groupClients.has(userId)) {
+//                 groupClients.get(userId).forEach((socket) => {
+//                     console.log("message");
+//                     console.log(userId);
+//                     socket.emit("messageEvent", parsedMessage);
+//                 });
+
+
+//             }
+//         });
+//     }
 // });
 
 // server.listen(PORT, () => {
 //     console.log(`Server and Socket.IO are running on port ${PORT}`);
 // });
 
-// app.use(cors({
-//     origin: "*",
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     credentials: true,
-// }));
+// app.use(
+//     cors({
+//         origin: "*",
+//         methods: ["GET", "POST", "PUT", "DELETE"],
+//         credentials: true,
+//     })
+// );
 // app.use(express.json({ limit: "16kb" }));
 // app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 // app.use("/api/v1/user", router);
 
 // export { app };
-
-
-
-// // import dotenv from "dotenv";
-
-// // import connectDB from "./db/index.js";
-// // import { app } from "./app.js";
-
-
-
-// // dotenv.config();
-
-
-// // const PORT = process.env.PORT || 3000;
-
-// // connectDB().then(
-// //     () => {
-// //       app.listen(PORT, () => {
-// //         console.log("Server is running on port " + PORT);
-// //       })
-// //     }
-// // ).catch((e) => {
-// //     console.error("ERROR:", e);
-// //     process.exit(1);
-// // })
-
 import dotenv from "dotenv";
 import connectDB from "./db/index.js";
 import cors from "cors";
@@ -183,7 +214,7 @@ const PORT = process.env.PORT || 3000;
 
 connectDB()
     .then(() => {
-        // console.log("Database connected");
+        console.log("Database connected");
     })
     .catch((e) => {
         console.error("Database connection error:", e);
@@ -226,8 +257,6 @@ const clients = new Map();
 
 // Subscribe to Redis channels
 io.on("connection", (socket) => {
-   
-
     socket.on("Id", (data) => {
         const { userId, groupId } = data; // Extract values safely
 
@@ -248,77 +277,54 @@ io.on("connection", (socket) => {
             groupClients.set(userId, []);
         }
 
-        // Add the socket to the user's list
-        groupClients.get(userId).push(socket);
+        // Check if the socket is already in the user's list
+        const userSockets = groupClients.get(userId);
+        if (!userSockets.includes(socket)) {
+            userSockets.push(socket);
+        }
 
         startMessageConsumer(groupId).catch(console.error);
-
-      
     });
 
-    // socket.on("disconnect", () => {
-    //     // Remove the socket from all groups and users
-    //     clients.forEach((groupClients, groupId) => {
-    //         groupClients.forEach((sockets, userId) => {
-    //             groupClients.set(
-    //                 userId,
-    //                 sockets.filter((s) => s !== socket)
-    //             );
-
-    //             // If the user has no more sockets, remove them
-    //             if (groupClients.get(userId).length === 0) {
-    //                 groupClients.delete(userId);
-    //             }
-    //         });
-
-    //         // If the group has no more users, remove it
-    //         if (groupClients.size === 0) {
-    //             clients.delete(groupId);
-    //         }
-    //     });
-
-       
-    // });
     socket.on("disconnect", () => {
         // Iterate over all groups
         clients.forEach((groupClients, groupId) => {
             // Collect users to remove
             const usersToRemove = [];
-    
+
             groupClients.forEach((sockets, userId) => {
                 // Filter out the disconnected socket
                 const updatedSockets = sockets.filter((s) => s !== socket);
 
-    
                 if (updatedSockets.length === 0) {
                     usersToRemove.push(userId); // Mark user for removal
                 } else {
                     groupClients.set(userId, updatedSockets); // Update sockets
                 }
             });
-            console.log(usersToRemove);
+
             // Remove users with no sockets
             usersToRemove.forEach((userId) => groupClients.delete(userId));
-    
+
             // Remove empty groups
             if (groupClients.size === 0) {
                 clients.delete(groupId);
             }
         });
     });
-    
+
     socket.on("messageEvent", async (msg) => {
-        const { groupId } = msg;
+        const { groupId, userId, message } = msg;
 
         // Publish the message to the Redis channel named after the groupId
-        pub.publish(groupId, JSON.stringify(msg));
+        pub.publish(groupId, JSON.stringify({ ...msg, createdBy: userId }));
 
         // Ensure the subscriber is subscribed to the groupId channel
         sub.subscribe(groupId, (err) => {
             if (err) {
-                // console.error(`Subscription error for ${groupId}:`, err);
+                console.error(`Subscription error for ${groupId}:`, err);
             } else {
-                // console.log(`Subscribed to Redis channel: ${groupId}`);
+                console.log(`Subscribed to Redis channel: ${groupId}`);
             }
         });
     });
@@ -334,16 +340,13 @@ sub.on("message", async (channel, message) => {
     const groupClients = clients.get(groupId);
 
     if (groupClients) {
-        // Forward the message to all users in the group except the sender
+        // Forward the message to all users in the group, including the sender
         userList.forEach((userId) => {
             if (groupClients.has(userId)) {
                 groupClients.get(userId).forEach((socket) => {
-                    console.log("message");
-                    console.log(userId);
+                    console.log("Sending message to user:", userId);
                     socket.emit("messageEvent", parsedMessage);
                 });
-
-
             }
         });
     }

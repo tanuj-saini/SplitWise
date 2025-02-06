@@ -59,82 +59,65 @@ const clients = new Map();
 
 // Subscribe to Redis channels
 io.on("connection", (socket) => {
-    console.log("New connection:", socket.id);
-
     socket.on("Id", (data) => {
-        const { userId, groupId } = data;
-        
+        const { userId, groupId } = data; // Extract values safely
+        console.log(userId);
+        console.log(groupId);
+
         if (!userId || !groupId) {
             console.error("Invalid userId or groupId received.");
-            return socket.disconnect(true); // Force disconnect for invalid data
+            return; // Stop execution if data is missing
         }
 
-        // Initialize group structure
+        // Initialize the group if it doesn't exist
         if (!clients.has(groupId)) {
             clients.set(groupId, new Map());
         }
-        const group = clients.get(groupId);
 
-        // Initialize user structure with Set for automatic deduplication
-        if (!group.has(userId)) {
-            group.set(userId, new Set());
+        const groupClients = clients.get(groupId);
+
+        // Check if the user already exists in the group
+        if (!groupClients.has(userId)) {
+            // Initialize the user if it doesn't exist
+            groupClients.set(userId, []);
         }
-        const userSockets = group.get(userId);
 
-        // Add socket to user's connection set
-        if (!userSockets.has(socket)) {
-            userSockets.add(socket);
-            console.log(`User ${userId} added to group ${groupId}`);
+        // Add the socket to the user's list if it's not already there
+        const userSockets = groupClients.get(userId);
+        if (!userSockets.includes(socket)) {
+            userSockets.push(socket);
         }
 
         startMessageConsumer(groupId).catch(console.error);
     });
 
-
-    // socket.on("disconnect", () => {
-    //     // Remove the socket from all groups and users
-    //     clients.forEach((groupClients, groupId) => {
-    //         groupClients.forEach((sockets, userId) => {
-    //             groupClients.set(
-    //                 userId,
-    //                 sockets.filter((s) => s !== socket)
-    //             );
-
-    //             // If the user has no more sockets, remove them
-    //             if (groupClients.get(userId).length === 0) {
-    //                 groupClients.delete(userId);
-    //             }
-    //         });
-
-    //         // If the group has no more users, remove it
-    //         if (groupClients.size === 0) {
-    //             clients.delete(groupId);
-    //         }
-    //     });
-
-       
-    // });
     socket.on("disconnect", () => {
-        clients.forEach((group, groupId) => {
-            group.forEach((userSockets, userId) => {
-                if (userSockets.has(socket)) {
-                    userSockets.delete(socket);
-                    console.log(`Socket ${socket.id} removed from ${userId} in ${groupId}`);
-                    
-                    // Cleanup empty entries
-                    if (userSockets.size === 0) {
-                        group.delete(userId);
-                        console.log(`User ${userId} removed from group ${groupId}`);
-                    }
+        // Iterate over all groups
+        clients.forEach((groupClients, groupId) => {
+            // Collect users to remove
+            const usersToRemove = [];
+
+            groupClients.forEach((sockets, userId) => {
+                // Filter out the disconnected socket
+                const updatedSockets = sockets.filter((s) => s !== socket);
+
+                if (updatedSockets.length === 0) {
+                    usersToRemove.push(userId); // Mark user for removal
+                } else {
+                    groupClients.set(userId, updatedSockets); // Update sockets
                 }
             });
-            
-            if (group.size === 0) {
+            console.log(usersToRemove);
+            // Remove users with no sockets
+            usersToRemove.forEach((userId) => groupClients.delete(userId));
+
+            // Remove empty groups
+            if (groupClients.size === 0) {
                 clients.delete(groupId);
-                console.log(`Group ${groupId} removed`);
             }
         });
     });
+
     socket.on("messageEvent", async (msg) => {
         const { groupId } = msg;
 
@@ -144,9 +127,9 @@ io.on("connection", (socket) => {
         // Ensure the subscriber is subscribed to the groupId channel
         sub.subscribe(groupId, (err) => {
             if (err) {
-                // console.error(`Subscription error for ${groupId}:`, err);
+                console.error(`Subscription error for ${groupId}:`, err);
             } else {
-                // console.log(`Subscribed to Redis channel: ${groupId}`);
+                console.log(`Subscribed to Redis channel: ${groupId}`);
             }
         });
     });
@@ -154,29 +137,26 @@ io.on("connection", (socket) => {
 
 // Handle messages from Redis
 sub.on("message", async (channel, message) => {
-    try {
-        const parsedMessage = JSON.parse(message);
-        await produceMessage(parsedMessage);
-        const { userList, groupId } = parsedMessage;
+    const parsedMessage = JSON.parse(message);
+    await produceMessage(message);
+    const { userList, message: msg, createdBy, groupId } = parsedMessage;
 
-        const group = clients.get(groupId);
-        if (!group) return;
+    // Get the group's clients
+    const groupClients = clients.get(groupId);
 
-        userList.forEach(userId => {
-            const userSockets = group.get(userId);
-            if (userSockets) {
-                userSockets.forEach(socket => {
-                    if (socket.connected) { // Check if socket is still active
-                        socket.emit("messageEvent", parsedMessage);
-                    }
+    if (groupClients) {
+        // Forward the message to all users in the group except the sender
+        userList.forEach((userId) => {
+          
+                groupClients.get(userId).forEach((socket) => {
+                    console.log("message");
+                    console.log(userId);
+                    socket.emit("messageEvent", parsedMessage);
                 });
-            }
+            
         });
-    } catch (error) {
-        console.error("Message handling error:", error);
     }
 });
-
 server.listen(PORT, () => {
     console.log(`Server and Socket.IO are running on port ${PORT}`);
 });

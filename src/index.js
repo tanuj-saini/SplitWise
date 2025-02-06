@@ -136,6 +136,7 @@ io.on("connection", (socket) => {
 });
 
 // Handle messages from Redis
+// Handle messages from Redis
 sub.on("message", async (channel, message) => {
     const parsedMessage = JSON.parse(message);
     await produceMessage(message);
@@ -147,13 +148,15 @@ sub.on("message", async (channel, message) => {
     if (groupClients) {
         // Forward the message to all users in the group except the sender
         userList.forEach((userId) => {
-          
-                groupClients.get(userId).forEach((socket) => {
-                    console.log("message");
-                    console.log(userId);
+            const userSockets = groupClients.get(userId);
+            if (userSockets) { // Check if user exists in the group
+                userSockets.forEach((socket) => {
+                    console.log("Emitting message to user:", userId);
                     socket.emit("messageEvent", parsedMessage);
                 });
-            
+            } else {
+                console.warn(`User ${userId} not found in group ${groupId}`);
+            }
         });
     }
 });

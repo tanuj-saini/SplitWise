@@ -138,22 +138,23 @@ io.on("connection", (socket) => {
 // Handle messages from Redis
 // Handle messages from Redis
 sub.on("message", async (channel, message) => {
+    console.log(`Received message from Redis channel: ${channel}`);
     const parsedMessage = JSON.parse(message);
     await produceMessage(message);
     const { userList, message: msg, createdBy, groupId } = parsedMessage;
+
+    // Deduplicate userList
+    const uniqueUserList = [...new Set(userList)];
 
     // Get the group's clients
     const groupClients = clients.get(groupId);
 
     if (groupClients) {
-        // Forward the message to all users in the group except the sender
-        userList.forEach((userId) => {
+        uniqueUserList.forEach((userId) => {
             const userSockets = groupClients.get(userId);
-            if (userSockets) { // Check if user exists in the group
-                userSockets.forEach((socket) => {
-                    console.log("Emitting message to user:", userId);
-                    socket.emit("messageEvent", parsedMessage);
-                });
+            if (userSockets && userSockets.length > 0) {
+                console.log("Emitting message to user:", userId);
+                userSockets[0].emit("messageEvent", parsedMessage);
             } else {
                 console.warn(`User ${userId} not found in group ${groupId}`);
             }

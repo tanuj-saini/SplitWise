@@ -12,6 +12,7 @@ const kafka = new Kafka({
     password: process.env.KAFKA_SASL_PASSWORD,
     mechanism: "plain",
   },
+  idempotent: true,
 });
 
 let producer = null;
@@ -41,26 +42,32 @@ export async function startMessageConsumer(groupId) {
 
   const consumer = kafka.consumer({ groupId: groupId });
   await consumer.connect();
-  await consumer.subscribe({ topic: "MESSAGES", fromBeginning: true });
+  await consumer.subscribe ({ topic: "MESSAGES", fromBeginning: true });
 
   await consumer.run({
-    autoCommit: true,
-    eachMessage: async ({ message, pause }) => {
-      
+    autoCommit: false, // Disable auto-commit
+    eachMessage: async ({ message, pause, commitOffsets }) => {
       if (!message) return;
-    
-    
-    
+  
       try {
-        // Save the message to the database with relevant fields
         const messageContent = JSON.parse(message.value.toString());
-      
+        
+        // Check for duplicates before processing
+        const isDuplicate = await checkForDuplicateMessage(messageContent);
+        if (isDuplicate) {
+          console.log("Duplicate message detected, skipping...");
+          return;
+        }
+  
         await createMessageService({
           message: messageContent.message,
           createdBy: messageContent.createdBy,
           groupId: messageContent.groupId
         });
-       
+  
+        // Manually commit the offset after successful processing
+        await commitOffsets([{ topic: message.topic, partition: message.partition, offset: message.offset }]);
+  
       } catch (err) {
         console.error("Error processing message:", err);
         pause();

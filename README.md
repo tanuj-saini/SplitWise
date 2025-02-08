@@ -66,6 +66,27 @@ This application can also be run using Docker. Follow these steps:
 
 4. The application will be accessible at `http://localhost:8080`.
 
+## Jenkins Setup
+
+This application can be built and deployed using Jenkins. Follow these steps:
+
+1. **Set Up Jenkins Pipeline**:
+    Create a new pipeline job in Jenkins.
+    Use the following pipeline script:
+
+2. **Configure Environment Variables**:
+    Replace the empty values in the environment block with your actual environment variables.
+    
+
+3. **Run the Pipeline**:
+   Save the pipeline configuration and run the job.
+   The pipeline will:
+    - Checkout the code from the main branch.
+    - Print debug information about the branch.
+    - Print debug information about the branch.
+    
+
+
 ## Usage
 
 To start the application without Docker, run:

@@ -10,14 +10,17 @@ import User from "../models/user.model.js";
 
 //Tokens
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const refreshToken = req.cookies?.refreshToken|| req.headers["refresh_token"]?.replace("Bearer ", ""); 
+    const refreshToken = req.headers["refresh_token"]?.replace("Bearer ", ""); 
+   
     if (!refreshToken) {
 
         return res.status(402).json(new ApiError(402, "Unauthorized"));
     }
     try {
         const decodedToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-        const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
+        const user = await User.findById(decodedToken?._id).select("-password ");
+       
+       
         if (!user) {
 
             
@@ -29,12 +32,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         }
         const options = {
             httpOnly:true,
-            secure:trueu
+            secure:true
         }
-        const {accessToken,newRefreshToken} = await generateRefreshTokenandAccessToken(user._id);
-        return res.status(200).cookie("accessToken",accessToken,options)
-        .cookie("refreshToken",newRefreshToken,options)
-        .json(new ApiResponse(200,{accessToken,newRefreshToken},"Token refreshed successfully"));
+        const {accessToken,refreshTokens} = await generateRefreshTokenandAccessToken(user._id);
+        return res.status(200)
+        .json(new ApiResponse(200,{accessToken,refreshTokens},"Token refreshed successfully"));
     } catch (error) {
   
         return res.status(402).json(new ApiError(401, error?.message || "Invalid Refresh Token"));
@@ -51,11 +53,11 @@ const generateRefreshTokenandAccessToken = async (userId) => {
      
             return res.status(404).json(new ApiError(404, "User not found"));
         }
-        const refreshToken = user.generateRefreshToken();
+        const refreshTokens = user.generateRefreshToken();
         const accessToken = user.generateToken();
-        user.refreshToken = refreshToken;
+        user.refreshToken = refreshTokens;
         await user.save({ validateBeforeSave: false });
-        return { refreshToken, accessToken };
+        return { refreshTokens, accessToken };
     } catch (error) {
 
         return res.status(500).json(new ApiError(500, "Error generating tokens"));

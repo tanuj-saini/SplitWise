@@ -3,7 +3,7 @@
 import { calculateGroupBalances, createExpense, getExpenseById, getExpensesByGroup, updateExpense } from '../controllers/expence.controller.js';
 import { createGroup, getGroupDetails, updateGroupDetails ,getUserGroups,checkPhoneNumber} from '../controllers/group.controller.js';
 import { createTransaction, getTransactionById, getTransactionsByGroup, updateTransaction } from '../controllers/transition.controller.js';
-import { changePassword, getUserDetails, loginUser, logoutUser, registerUser, updateUserDetails } from '../controllers/user.controller.js';
+import { changePassword, getUserDetails, loginUser, logoutUser, refreshAccessToken, registerUser, updateUserDetails } from '../controllers/user.controller.js';
 import { updateBalanceSheet ,getBalanceId} from '../controllers/balance.controller.js'
 import { VerifyJWT } from '../middlewares/auth.middleware.js';
 import { getMessgeGroups } from '../controllers/message.controller.js';
@@ -23,6 +23,7 @@ import { getMessgeGroups } from '../controllers/message.controller.js';
 //User routes
 router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
+router.route("/refresh-token").get(refreshAccessToken);
 
 
 //User scure routes

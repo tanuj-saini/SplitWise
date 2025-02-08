@@ -3,22 +3,22 @@ pipeline {
 
     environment {
         // Define your environment variables here
-        PORT = '8080'
-        MONGO_URL = 'mongodb+srv://medeaszzz:YVZdlBODuGtzQwPf@cluster0.ijdak.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+        PORT = ''
+        MONGO_URL = ''
         CORS_ORIGIN = '*'
-        ACCESS_TOKEN_SECRET = '1234567890'
-        REFRESH_TOKEN_SECRET = '0987654321'
-        ACCESS_TOKEN_EXPIRY = '1d'
-        REFRESH_TOKEN_EXPIRY = '10d'
-        REDIS_HOST = 'caching-3003077a-lokhanderohit2020-0d67.f.aivencloud.com'
-        REDIS_PORT = '20071'
-        REDIS_USERNAME = 'default'
-        REDIS_PASSWORD = 'AVNS_EfTD1r7Qtv0lh9cvkXX'
-        KAFKA_BROKER = 'kafka-cc0288c-lokhanderohit2020-0d67.f.aivencloud.com:20084'
-        KAFKA_SASL_USERNAME = 'avnadmin'
-        KAFKA_SASL_PASSWORD = 'AVNS_k5Y-uXYXw3Qb6hrsw_v'
+        ACCESS_TOKEN_SECRET = ''
+        REFRESH_TOKEN_SECRET = ''
+        ACCESS_TOKEN_EXPIRY = ''
+        REFRESH_TOKEN_EXPIRY = ''
+        REDIS_HOST = ''
+        REDIS_PORT = ''
+        REDIS_USERNAME = ''
+        REDIS_PASSWORD = ''
+        KAFKA_BROKER = ''
+        KAFKA_SASL_USERNAME = ''
+        KAFKA_SASL_PASSWORD = ''
         KAFKA_SSL_CA_PATH = './ca.cer'
-        PATH = "/usr/local/bin:${env.PATH}"
+        PATH = "/usr/local/bin:${env.PATH}"//Node
         
         
         // NODE_ENV = 'production' // Uncomment if needed

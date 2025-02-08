@@ -16,6 +16,7 @@ const kafka = new Kafka({
 
 let producer = null;
 
+
 export async function createProducer() {
   if (producer) return producer;
 

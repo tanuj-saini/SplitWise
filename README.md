@@ -85,6 +85,80 @@ This application can be built and deployed using Jenkins. Follow these steps:
     - Print debug information about the branch.
     - Print debug information about the branch.
     
+## Kubernetes Setup
+
+This application can also be deployed using Kubernetes. Follow these steps:
+
+1. **Create Kubernetes Deployment and Service Files**:
+    Create a `deployment.yaml` file with the following content:
+
+    ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: splitwise-deployment
+    spec:
+      replicas: 3
+      selector:
+        matchLabels:
+          app: splitwise
+      template:
+        metadata:
+          labels:
+            app: splitwise
+        spec:
+          containers:
+          - name: splitwise
+            image: tanujsaini/splitwise-backend
+            ports:
+            - containerPort: 8080
+            env:
+            - name: PORT
+              value: "8080"
+            - name: MONGO_URL
+               value: "your_mongodb_connection_string"
+            - name: CORS_ORIGIN
+              value: "your_cors_origin"
+            - name: ACCESS_TOKEN_SECRET
+              value: "your_access_token_secret"
+            - name: REFRESH_TOKEN_SECRET
+              value: "your_refresh_token_secret"
+            - name: ACCESS_TOKEN_EXPIRY
+              value: "your_access_token_expiry"
+            - name: REFRESH_TOKEN_EXPIRY
+              value: "your_refresh_token_expiry"
+    ```
+
+    Create a `service.yaml` file with the following content:
+
+    ```yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: splitwise-service
+    spec:
+      selector:
+        app: splitwise
+      ports:
+       - protocol: TCP
+          port: 80
+          targetPort: 8080
+      type: LoadBalancer
+    ```
+2. **Deploy to Kubernetes**:
+    Apply the deployment and service files to your Kubernetes cluster:
+
+    ```sh
+    kubectl apply -f deployment.yaml
+    kubectl apply -f service.yaml
+    ```
+
+3. **Access the Application**:
+    The application will be accessible at the external IP address of the LoadBalancer service. You can get the external IP address by running:
+
+    ```sh
+    kubectl get services
+    ```
 
 
 ## Usage

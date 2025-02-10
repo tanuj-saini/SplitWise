@@ -13,7 +13,7 @@ import client from "prom-client";
 import responseTime  from "response-time";
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3040;
 
 connectDB()
     .then(() => {
@@ -173,7 +173,7 @@ const register = new client.Registry();
 client.collectDefaultMetrics({ register });
 
 
-register.registerMetric(httpRequestDurationMicroseconds);
+
 
 const httpRequestDurationMicroseconds = new client.Histogram({
     name: "http_request_duration_ms",
@@ -181,7 +181,7 @@ const httpRequestDurationMicroseconds = new client.Histogram({
     labelNames: ["method", "route", "status_code"],
     buckets: [0.1, 5, 15, 50, 100, 500, 200, 800, 2000],
   });
-
+  register.registerMetric(httpRequestDurationMicroseconds);
 app.use(
     cors({
         origin: "*",

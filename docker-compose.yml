@@ -4,9 +4,8 @@ services:
 
   
   app:
-    image: node:20
+    image: tanujsaini/splitwisetest
     container_name: split-wise
-    working_dir: /app
     env_file: 
       - .env
     ports:

@@ -165,10 +165,16 @@ sub.on("message", async (channel, message) => {
 server.listen(PORT, () => {
     console.log(`Server and Socket.IO are running on port ${PORT}`);
 });
+
 const collectDefaultMetrics = client.collectDefaultMetrics;
 collectDefaultMetrics({ timeout: 5000 });
+
 const register = new client.Registry();
 client.collectDefaultMetrics({ register });
+
+
+register.registerMetric(httpRequestDurationMicroseconds);
+
 const httpRequestDurationMicroseconds = new client.Histogram({
     name: "http_request_duration_ms",
     help: "Duration of HTTP requests in ms",

@@ -15,7 +15,11 @@ services:
       - .:/app
     command: ["npm", "start"]
    
-
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    ports:
+      - "3000:3000"
 
   prom-server:
     image: prom/prometheus

@@ -7,7 +7,10 @@ import http from "http";
 import Redis from "ioredis";
 import { produceMessage, startMessageConsumer } from "./kafks.js";
 import router from "./routes/user.route.js";
-
+// const client = require("prom-client");
+// const responseTime = require("response-time");
+import client from "prom-client";
+import responseTime  from "response-time";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -162,6 +165,16 @@ sub.on("message", async (channel, message) => {
 server.listen(PORT, () => {
     console.log(`Server and Socket.IO are running on port ${PORT}`);
 });
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ timeout: 5000 });
+const register = new client.Registry();
+client.collectDefaultMetrics({ register });
+const httpRequestDurationMicroseconds = new client.Histogram({
+    name: "http_request_duration_ms",
+    help: "Duration of HTTP requests in ms",
+    labelNames: ["method", "route", "status_code"],
+    buckets: [0.1, 5, 15, 50, 100, 500, 200, 800, 2000],
+  });
 
 app.use(
     cors({
@@ -172,6 +185,18 @@ app.use(
 );
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+
+  app.use(
+    responseTime((req, res, time) => {
+      httpRequestDurationMicroseconds
+        .labels({
+          method: req.method,
+          route: req.url,
+          status_code: req.statusCode,
+        })
+        .observe(time);
+    })
+  );
 app.use("/api/v1/user", router);
 
 export { app };

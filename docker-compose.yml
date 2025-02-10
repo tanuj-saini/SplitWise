@@ -1,9 +1,11 @@
 version: '3.8'
 
 services:
+
+  
   app:
     image: node:20
-    container_name: splitwise-app
+    container_name: split-wise
     working_dir: /app
     env_file: 
       - .env
@@ -12,14 +14,12 @@ services:
     volumes:
       - .:/app
     command: ["npm", "start"]
-    depends_on:
-      - mongo
+   
 
-  mongo:
-    image: mongo:6
-    container_name: mongo-db
+
+  prom-server:
+    image: prom/prometheus
     ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      - "9090:9090"
+    volumes:
+      - ./prometheus-config.yml:/etc/prometheus/prometheus.yml

@@ -159,7 +159,8 @@ This application can also be deployed using Kubernetes. Follow these steps:
 
 
 
-
+RESULT
+![Prometheus Config connection server](images/result.png)
 
 ## Usage
 

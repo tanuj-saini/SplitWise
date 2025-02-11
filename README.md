@@ -1,7 +1,9 @@
 # SplitWise
 
 A simple expense-sharing application.
-
+ 
+[Data Model Url](https://app.eraser.io/workspace/QKu3NISCsFuqermI9WPX?origin=share)
+ 
 ## First of all, create a .env file before proceeding with the following steps.
     Create a `.env` file in the root directory and add the following variables:
 

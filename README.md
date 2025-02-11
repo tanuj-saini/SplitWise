@@ -142,20 +142,21 @@ This application can also be deployed using Kubernetes. Follow these steps:
     ```
 
 ## Grafana Prometheus Setup
+1.  Installation of the backend code using Docker
 
-1.  If your server is deployed on your local machine, then configure prometheus-config.yml as shown in the picture.
+2.  If your server is deployed on your local machine, then configure prometheus-config.yml as shown in the picture.
     ![Prometheus Config local machine](images/prometheus-config-local-machine.png)
 
     The connection management looks like this
     ![Prometheus Config connection local](images/Connection-local.png)
 
 
-2.  If your server is deployed on a cloud service or remote server, configure prometheus-config.yml accordingly as per the service requirements.
- ![Prometheus Config local machine](images/prometheus-config-server.png)
+3.  If your server is deployed on a cloud service or remote server, configure prometheus-config.yml accordingly as per the service requirements.
+    ![Prometheus Config local machine](images/prometheus-config-server.png)
 
-  The connection management looks like this
+    The connection management looks like this
   
- ![Prometheus Config connection server](images/connection-server.png)
+    ![Prometheus Config connection server](images/connection-server.png)
 
 
 Gafana

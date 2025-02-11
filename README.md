@@ -2,22 +2,8 @@
 
 A simple expense-sharing application.
 
-## Installation
-
-1. Clone the repository:
-
-    ```sh
-    git clone https://github.com/tanuj-saini/SplitWise.git
-    cd splitwise
-    ```
-
-2. Install the dependencies:
-
-    ```sh
-    npm install
-    ```
-
-3. Set up the environment variables. Create a `.env` file in the root directory and add the following variables:
+## First of all, create a .env file before proceeding with the following steps.
+    Create a `.env` file in the root directory and add the following variables:
 
     ```env
         PORT = ''
@@ -38,54 +24,47 @@ A simple expense-sharing application.
 
     ```
 
-4. Start the development server:
+
+## Installation of the backend code on your system
+
+1. Clone the repository:
+
+    ```sh
+    git clone https://github.com/tanuj-saini/SplitWise.git
+    cd splitwise
+    ```
+
+2. Install the dependencies:
+
+    ```sh
+    npm install
+    ```
+
+
+
+3. Start the development server:
 
     ```sh
     npm run dev
     ```
 
-## Docker Setup
+## Installation of the backend code using Docker
 
 This application can also be run using Docker. Follow these steps:
 
-1. Pull the Docker image from Docker Hub:
-
-    ```sh
-    docker pull tanujsaini/splitwise-backend
-    ```
-
-2. Create a `.env` file in the root directory with the following variables: (See Above)
-    
-
-   
-
-
-3. Start the application using Docker Compose:
+1. Start the application using Docker Compose:
 
     ```sh
     docker-compose up -d
     ```
 
-4. The application will be accessible at `http://localhost:8080`.
+2. The application will be accessible at `http://localhost:7070`.
 
 ## Jenkins Setup
 
 This application can be built and deployed using Jenkins. Follow these steps:
 
-1. **Set Up Jenkins Pipeline**:
-    Create a new pipeline job in Jenkins.
-    Use the following pipeline script:
-
-2. **Configure Environment Variables**:
-    Replace the empty values in the environment block with your actual environment variables.
-    
-
-3. **Run the Pipeline**:
-   Save the pipeline configuration and run the job.
-   The pipeline will:
-    - Checkout the code from the main branch.
-    - Print debug information about the branch.
-    - Print debug information about the branch.
+For Jenkins, simply copy the code from the Jenkinsfile, install the Pipeline plugin, paste the Jenkinsfile (pipeline code) into Jenkins, and run it
     
 ## Kubernetes Setup
 
@@ -162,6 +141,20 @@ This application can also be deployed using Kubernetes. Follow these steps:
     kubectl get services
     ```
 
+## Grafana Prometheus Setup
+
+If your server is deployed on your local machine, then configure prometheus-config.yml as shown in the picture.
+![Prometheus Config](https://drive.google.com/file/d/1AcDgGHmUxr5XhHohLsGtHfXA0TFaEBdQ/view?usp=sharing)
+
+
+
+1. Start the application using Docker Compose:
+
+    ```sh
+    docker-compose up -d
+    ```
+
+2. The application will be accessible at `http://localhost:7070`.
 
 ## Usage
 

@@ -150,7 +150,7 @@ This application can also be deployed using Kubernetes. Follow these steps:
     ![Prometheus Config connection local](images/Connection-local.png)
 
 
-2.If your server is deployed on a cloud service or remote server, configure prometheus-config.yml accordingly as per the service requirements.
+2.  If your server is deployed on a cloud service or remote server, configure prometheus-config.yml accordingly as per the service requirements.
  ![Prometheus Config local machine](images/prometheus-config-server.png)
 
   The connection management looks like this

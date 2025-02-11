@@ -158,9 +158,12 @@ This application can also be deployed using Kubernetes. Follow these steps:
  ![Prometheus Config connection server](images/connection-server.png)
 
 
+Gafana
+![Prometheus Config connection gafana](images/Connection-gafana.png)
 
-RESULT
-![Prometheus Config connection server](images/result.png)
+
+Result
+![Prometheus Config connection result](images/result.png)
 
 ## Usage
 

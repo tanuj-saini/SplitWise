@@ -165,9 +165,4 @@ Gafana
 Result
 ![Prometheus Config connection result](images/result.png)
 
-## Usage
 
-To start the application without Docker, run:
-
-```sh
-npm start

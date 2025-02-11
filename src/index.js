@@ -203,6 +203,11 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
         .observe(time);
     })
   );
+
+  app.get("/metrics", async (req, res) => {
+    res.setHeader("Content-Type", register.contentType);
+    res.send(await register.metrics());
+  });
 app.use("/api/v1/user", router);
 
 export { app };

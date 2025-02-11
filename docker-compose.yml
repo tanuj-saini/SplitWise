@@ -1,8 +1,6 @@
 version: '3.8'
 
 services:
-
-  
   app:
     image: tanujsaini/splitwisetest
     container_name: split-wise

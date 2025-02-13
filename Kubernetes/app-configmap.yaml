@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-env
+data:
+  # Example: Replace these with your actual .env key-value pairs.
+  PORT: "7070"
+  # Add other env variables as needed.

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: splitwise
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: splitwise
+  template:
+    metadata:
+      labels:
+        app: splitwise
+    spec:
+      containers:
+        - name: splitwise
+          image: tanujsaini/splitwisetest1
+          ports:
+            - containerPort: 7070  # Must match the PORT value from the env config.
+          envFrom:
+            - configMapRef:
+                name: app-env
+          # Note: In Kubernetes, mounting your local directory (volumes: .:/app) is typically not required.

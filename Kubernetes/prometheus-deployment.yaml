@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prom-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prom-server
+  template:
+    metadata:
+      labels:
+        app: prom-server
+    spec:
+      containers:
+        - name: prom-server
+          image: prom/prometheus
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: prometheus-config-volume
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
+      volumes:
+        - name: prometheus-config-volume
+          configMap:
+            name: prometheus-config
+

@@ -6,4 +6,4 @@ scrape_configs:
     metrics_path: '/metrics'
     scheme: 'https'
     static_configs:
-      - targets: ['splitwise-.onrender.com'] 
+      - targets: ['splitwise-242x.onrender.com'] 

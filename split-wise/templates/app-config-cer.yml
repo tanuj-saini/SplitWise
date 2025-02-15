@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-kafka-cert
+data:
+  ca.cer: |
+    {{- .Files.Get "ca.cer" | nindent 4 }}

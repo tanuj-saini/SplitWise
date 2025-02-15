@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-app-env
+data:
+{{- range $key, $value := .Values.app.env }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}

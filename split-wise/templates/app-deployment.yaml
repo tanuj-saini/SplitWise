@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-app
+    spec:
+      containers:
+        - name: app
+          image: {{ .Values.app.image }}
+          command: ["npm", "start"]
+          workingDir: /usr/src/app
+          ports:
+            - containerPort: {{ .Values.app.service.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-app-env
+          volumeMounts:
+            - mountPath: /usr/src/app
+              name: app-volume
+            - mountPath: /usr/src/app/ca.cer
+              name: kafka-cert
+              subPath: ca.cer
+      volumes:
+        - name: app-volume
+          hostPath:
+            path: /mnt/splitwise
+        - name: kafka-cert
+          configMap:
+            name: {{ .Release.Name }}-kafka-cert

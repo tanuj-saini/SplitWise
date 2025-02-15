@@ -35,22 +35,30 @@ app:
     enabled: true
     hostPath: /mnt/splitwise  # Changed to match minikube mount point  # Path to your Node.js app root
 
-# Prometheus Configuration
+# values.yml (corrected)
 prometheus:
   server:
+    persistentVolume:
+      enabled: false
+    configMapReload:
+      enabled: true
     extraArgs:
-      web.enable-lifecycle: ""  # Empty value means the flag is enabled
-  serverFiles:
-    prometheus.yml:
-      global:
-        scrape_interval: "4s"
-      scrape_configs:
-        - job_name: "split-wise"
-          static_configs:
-            - targets:
-                - "splitwise-242x.onrender.com"
-
-
+      web.enable-lifecycle: ""
+      web.enable-admin-api: "true"  # Needs explicit value
+    serverFiles:
+      prometheus.yml:
+        global:
+          scrape_interval: 15s
+          evaluation_interval: 15s
+        scrape_configs:
+          - job_name: 'split-wise'
+            static_configs:
+              - targets: ['splitwise-242x.onrender.com']
+            scheme: http
+            metrics_path: /metrics
+    service:
+      type: NodePort
+      nodePort: 30190
 # Grafana Configuration
 grafana:
   service:

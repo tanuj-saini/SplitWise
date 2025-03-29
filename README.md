@@ -168,4 +168,6 @@ Gafana
 Result
 ![Prometheus Config connection result](images/result.png)
 
+Devops Flow
+![Devops Flow Chart](PHOTO-2025-03-28-14-23-51.jpg)
 

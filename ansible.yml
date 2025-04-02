@@ -1,0 +1,21 @@
+---
+- name: Deploy Kubernetes Resources
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    k8s_manifests:
+      - app-configmap.yaml
+      - grafana-deployment.yaml
+      - grafana-service.yaml
+      - prometheus-configmap.yaml
+      - prometheus-deployment.yaml
+      - prometheus-service.yaml
+      - splitwise-deployment.yaml
+      - splitwise-service.yaml
+
+  tasks:
+    - name: Deploy Kubernetes manifest files
+      command: kubectl apply -f /home/rohit/Server/SplitWise/Kubernetes/{{ item }}
+      loop: "{{ k8s_manifests }}"
+

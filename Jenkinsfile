@@ -43,26 +43,80 @@ pipeline {
                 }
             }
         }
-
-        stage('Build') {
-            when {
-                // Use a regex to match the branch name
-                expression { 
-                    env.GIT_BRANCH == 'origin/main' || 
-                    env.BRANCH_NAME == 'main' ||
-                    sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim() == 'main'
-                }
-            }
-            steps {
-                sh 'node --version'
-                sh 'npm --version'
-                // Install dependencies and run
-                
-                sh 'npm install'
-                sh 'node src/index.js'
-            }
+        
+      stage('Send File To ansible Server') {
+    steps {
+        sshagent(['docker-split']) {
+            sh '''
+            # Remove the existing SplitWise folder on the remote server if it exists
+            ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "if [ -d /home/rohit/Server/SplitWise ]; then rm -rf /home/rohit/Server/SplitWise; fi"
+            
+            # Copy the local SplitWise folder to the remote server
+            scp -r -o StrictHostKeyChecking=no /Users/tanujsaini/Desktop/SplitWise rohit@192.168.1.16:/home/rohit/Server
+            
+            # After the folder is copied, copy the node_modules folder from its location on the server
+            ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cp -r /home/rohit/Desktop/node_modules /home/rohit/Server/SplitWise/"
+            '''
         }
-    
+    }
+}
+
+stage('Docker Build Image') {
+    steps {
+        sshagent(['docker-split']) {
+            sh '''
+            ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && docker build --progress=plain -t splitserver:v1.$BUILD_ID ."
+            '''
+        }
+    }
+}
+
+
+stage('Docker Image Tagging') {
+    steps {
+        sshagent(['docker-split']) {
+           
+          sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 cd /home/rohit/Server/SplitWise'
+          sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 docker image tag splitserver:v1.$BUILD_ID serverhyper/splitserver:v1.$BUILD_ID '
+          sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 docker image tag splitserver:v1.$BUILD_ID serverhyper/splitserver:latest '
+           
+           
+        }
+    }
+}
+stage('Push Docker Image to DockerHub') {
+    steps {
+        sshagent(['docker-host']) {
+            withCredentials([string(credentialsId: 'e5b22b94-57be-4d32-b128-2db30ebeb6e5', variable: 'dockerhub_passwd')]) {
+    // some block
+
+           
+          sh "docker login -u serverhyper -p ${dockerhub_passwd}"
+          sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 cd /home/rohit/Server/SplitWise'
+          sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 docker image push serverhyper/splitserver:v1.$BUILD_ID '
+          sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 docker image push serverhyper/splitserver:latest '
+          sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 docker image rm serverhyper/splitserver:v1.$BUILD_ID serverhyper/splitserver:latest splitserver:v1.$BUILD_ID'
+          
+          
+            }
+           
+        }
+    }
+}
+stage('Kubernetes Deplyment to ansible Server') {
+    steps {
+        sshagent(['docker-split']) {
+             sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && ansible-playbook ansible.yml"'
+
+              
+          
+        }
+    }
+}
+
+
+
+
 }
     post {
         success {

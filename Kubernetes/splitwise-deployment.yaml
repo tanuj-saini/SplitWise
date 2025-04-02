@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: splitwise
-          image: tanujsaini/splitwisetest1
+          image: serverhyper/splitserver
           ports:
             - containerPort: 7070  # Must match the PORT value from the env config.
           envFrom:

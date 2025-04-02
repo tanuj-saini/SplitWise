@@ -1,0 +1,9 @@
+---
+- name: Deploy ArgoCD Pipeline
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Apply ArgoCD pipeline manifest
+      command: kubectl apply -f application.yml
+      args:
+        chdir: "{{ playbook_dir }}"

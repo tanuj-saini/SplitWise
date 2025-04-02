@@ -1,0 +1,26 @@
+# For GitOps ArgoCD
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-splitWise
+  namespace: argocd
+spec:
+  project: default 
+  # The project name should match the one defined in your ArgoCD project.
+  source:
+    repoURL: "https://github.com/tanuj-saini/SplitWise.git"
+    targetRevision: HEAD
+      #  the last commit hash of the branch you want to deploy - head
+    path: "Kubernetes"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: splitWise
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+
+ 

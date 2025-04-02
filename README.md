@@ -175,6 +175,5 @@ Gitops (ArgoCD)
 ![Devops Flow Chart](images/argo.jpg)
 
 Video Explanation
-[![Video Thumbnail]](https://drive.google.com/file/d/1kL1ubBBpYVBlTLAWaH8aHBSj-pAV2S_H/view)
-
+[![Video Thumbnail](https://drive.google.com/uc?id=1kL1ubBBpYVBlTLAWaH8aHBSj-pAV2S_H)](https://drive.google.com/file/d/1kL1ubBBpYVBlTLAWaH8aHBSj-pAV2S_H/view)
 

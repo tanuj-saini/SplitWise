@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-splitWise
+  name: app-splitwise
   namespace: argocd
 spec:
   project: default 

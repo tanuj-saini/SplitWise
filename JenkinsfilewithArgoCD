@@ -107,7 +107,7 @@ stage('Kubernetes Deplyment to ansible Server') {
     steps {
         sshagent(['docker-split']) {
              sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && ansible-playbook ansibleArgoCD.yml"'
-
+            //  sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && ansible-playbook ansible.yml"'
               
           
         }

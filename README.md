@@ -174,6 +174,10 @@ Devops Flow
 Gitops (ArgoCD)
 ![Devops Flow Chart](images/argo.jpg)
 
+SplitWise Docs
+[[SplitWise Docs]](https://drive.google.com/file/d/1MSzwo2EAAzdCn-ZKeoMNDOEGSmSKTlAk/view?usp=sharing)
+
+
 Video Explanation
 [[Video Thumbnail]](https://drive.google.com/file/d/1kL1ubBBpYVBlTLAWaH8aHBSj-pAV2S_H/view)
 

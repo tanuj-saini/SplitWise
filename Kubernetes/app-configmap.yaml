@@ -5,7 +5,6 @@ metadata:
 data:
   # Example: Replace these with your actual .env key-value pairs.
   PORT: "7070"
-
   MONGO_URL: "mongodb+srv://medeaszzz:YVZdlBODuGtzQwPf@cluster0.ijdak.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
   CORS_ORIGIN: "*"
   ACCESS_TOKEN_SECRET: "1234567890"

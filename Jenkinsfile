@@ -71,6 +71,30 @@ stage('Docker Build Image') {
     }
 }
 
+stage('Install Trivy') {
+    steps {
+        // Check if Trivy is installed; if not, install it.
+        sh '''
+           if ! command -v trivy > /dev/null; then
+             echo "Trivy not found. Installing..."
+             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+           else
+             echo "Trivy is already installed: $(trivy --version)"
+           fi
+        '''
+    }
+}
+
+stage('Docker Image Scanning with Trivy') {
+    steps {
+        sshagent(['docker-split']) {
+            sh ''' 
+              trivy image serverhyper/splitserver:latest > scan.txt
+              cat scan.txt
+            '''
+        }
+    }
+}
 
 stage('Docker Image Tagging') {
     steps {
@@ -106,9 +130,8 @@ stage('Push Docker Image to DockerHub') {
 stage('Kubernetes Deplyment to ansible Server') {
     steps {
         sshagent(['docker-split']) {
-             sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && ansible-playbook ansible.yml"'
-//    sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && ansible-playbook ansibleArgoCD.yml"'
-//Above for GitOPS ArgoCD
+             sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && ansible-playbook ansibleArgoCD.yml"'
+            //  sh 'ssh -o StrictHostKeyChecking=no rohit@192.168.1.16 "cd /home/rohit/Server/SplitWise && ansible-playbook ansible.yml"'
               
           
         }
